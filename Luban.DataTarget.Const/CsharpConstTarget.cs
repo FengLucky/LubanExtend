@@ -58,7 +58,7 @@ public class CsharpConstTarget: ConstTargetBase
             {
                 sb.Append('\t', indent).Append("/// <summary>").AppendLine();
                 sb.Append('\t', indent).Append("/// ").Append(record.Data.Fields[commentIndex]).AppendLine();
-                sb.Append('\t', indent).Append("/// <summary>").AppendLine();
+                sb.Append('\t', indent).Append("/// </summary>").AppendLine();
             }
             sb.Append('\t', indent).Append("public const ").Append(table.IndexField.CType.TypeName).Append(" ").Append(dString.Value).Append(" = ")
                 .Append(record.Data.Fields[table.IndexFieldIdIndex]).Append(";").AppendLine();
