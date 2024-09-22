@@ -7,6 +7,9 @@ namespace Luban.DataTarget.Const;
 
 public sealed class PageTableConst
 {
+    /// <summary>
+    /// 这是一个界面
+    /// </summary>
     public const string Family = "page";
 }
 
@@ -16,7 +19,7 @@ public class CsharpConstTarget: ConstTargetBase
     protected override string DefaultOutputFileExt => "cs";
     private readonly string[] _validIndexTypes = { "short","int", "long", "string" };
 
-    protected override string? GenCode(DefTable table, List<Record> records, int constIndex)
+    protected override string? GenCode(DefTable table, List<Record> records, int constIndex,int commentIndex)
     {
         var logger = LogManager.GetCurrentClassLogger();
         if (table.IndexList.Count != 1)
@@ -33,7 +36,6 @@ public class CsharpConstTarget: ConstTargetBase
         
         var indent = 0;
         var sb = new StringBuilder();
-      
         if (!string.IsNullOrWhiteSpace(table.NamespaceWithTopModule))
         {
             sb.Append("namespace ").Append(table.NamespaceWithTopModule).AppendLine();
@@ -50,6 +52,13 @@ public class CsharpConstTarget: ConstTargetBase
             if (record.Data.Fields[constIndex] is not DString dString || string.IsNullOrWhiteSpace(dString.Value))
             {
                 continue;
+            }
+
+            if (commentIndex >= 0)
+            {
+                sb.Append('\t', indent).Append("/// <summary>").AppendLine();
+                sb.Append('\t', indent).Append("/// ").Append(record.Data.Fields[commentIndex]).AppendLine();
+                sb.Append('\t', indent).Append("/// <summary>").AppendLine();
             }
             sb.Append('\t', indent).Append("public const ").Append(table.IndexField.CType.TypeName).Append(" ").Append(dString.Value).Append(" = ")
                 .Append(record.Data.Fields[table.IndexFieldIdIndex]).Append(";").AppendLine();

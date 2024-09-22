@@ -10,11 +10,16 @@ public abstract class ConstTargetBase : DataTargetBase
         var constIndex = table.ValueTType.DefBean.Fields.FindIndex(field => field.Groups.FindIndex(group => group == "const") > -1 && field.CType.TypeName == "string");
         if (constIndex == -1)
         {
-            
             return null;
         }
-
-        var content = GenCode(table, records, constIndex);
+        table.ValueTType.DefBean.Fields[constIndex].Tags.TryGetValue("comment",out var commentField);
+        int commentIndex = -1;
+        if (!string.IsNullOrWhiteSpace(commentField))
+        {
+            commentIndex = table.ValueTType.DefBean.Fields.FindIndex(field =>
+                field.CurrentVariantNameWithFieldNameOrOrigin == commentField);
+        }
+        var content = GenCode(table, records, constIndex,commentIndex);
         if (content == null)
         {
             return null;
@@ -22,5 +27,5 @@ public abstract class ConstTargetBase : DataTargetBase
         return new OutputFile { File = $"{table.Name}Const.{OutputFileExt}", Content = content };
     }
 
-    protected abstract string? GenCode(DefTable table, List<Record> records, int constIndex);
+    protected abstract string? GenCode(DefTable table, List<Record> records, int constIndex,int commentIndex);
 }
