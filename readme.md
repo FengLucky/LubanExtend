@@ -1,7 +1,7 @@
 ### 构建方法
 - 将该目录下文件复制到 `Luban/src/` 目录下
 - `Luban` 项目添加该目录下项目的引用
-- 该目录下项目添加对 `Luban` 和 `Luban.Core` 项目的引用
+- 该目录下项目添加对 `Luban.Core` 项目的引用
 - 修改鲁班 `OutputFileManifest.cs` 文件 `public void AddFile(OutputFile file)` 方法如下
 ```c#
 public void AddFile(OutputFile file)
