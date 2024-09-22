@@ -3,7 +3,7 @@
 - Luban 项目添加该目录下项目的引用
 - 该目录下项目添加对 Luban 和 Luban.Core 项目的引用
 - 修改鲁班 OutputFileManifest 文件 public void AddFile(OutputFile file) 方法如下
-`
+```c#
 public void AddFile(OutputFile file)
 {
     if (file == null)
@@ -15,7 +15,7 @@ public void AddFile(OutputFile file)
         _dataFiles.Add(file);
     }
 }
-`
+```
 ### Luban.Data.Target.Const 构建数据同时构建和索引绑定的常量代码
 仅支持单索引，且索引类型为`short` `int` `long` `string`
 #### 使用方法
