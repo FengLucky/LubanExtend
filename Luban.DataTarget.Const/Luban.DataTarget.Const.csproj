@@ -11,6 +11,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\luban\src\Luban.Core\Luban.Core.csproj" />
+      <ProjectReference Include="..\..\luban\src\Luban\Luban.csproj" />
       <ProjectReference Include="..\Luban.Core\Luban.Core.csproj" />
     </ItemGroup>
 
