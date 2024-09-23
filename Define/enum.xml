@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<module
+        xmlns="enum"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="enum ~enum.xsd"
+        name="">
+    <enum name="LanguageType" comment="语言类型">
+        <var name="Chinese" comment="中文"/>
+    </enum>
+</module>

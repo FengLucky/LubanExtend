@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<module
+        xmlns="bean"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="bean ~bean.xsd"
+        name="">
+    <bean name="PageBean" comment="界面配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="_comment" type="string" comment="备注" group="comment"/>
+        <var name="_const" type="string" comment="常量名" group="const" tags="comment=_comment"/>
+        <var name="resPath" type="string#path=unity" comment="界面资源路径"/>
+        <var name="holderType" type="string" comment="界面 Holder 类型"/>
+        <var name="zThickness" type="int#range=[0,]" comment="z轴厚度"/>
+        <var name="coverScreen" type="bool" comment="完全覆盖屏幕"/>
+        <var name="alwaysInMemory" type="bool" comment="被覆盖时不销毁"/>
+        <var name="multiple" type="bool" comment="可以同时存在多个"/>
+    </bean>
+    <bean name="AttributeBean" comment="属性配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="_comment" type="string" comment="备注" group="comment"/>
+        <var name="_const" type="string" comment="常量名" group="const" tags="comment=_comment"/>
+        <var name="name" type="int#ref=LanguageTable" comment="属性名"/>
+        <var name="maxValue" type="int#range=[0,]" comment="最大值,等于0时不限制"/>
+        <var name="defaultValue" type="int#range=[0,]" comment="默认值"/>
+    </bean>
+    <bean name="TileBean" comment="地图块配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="name" type="int#ref=LanguageTable" comment="名称"/>
+        <var name="thumbnail" type="SpriteBean" comment="缩略图"/>
+    </bean>
+    <bean name="TileAdditionBean" comment="地形加成配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="addition" type="list,int" comment="防御加成百分比，长度匹配格子表"/>
+    </bean>
+    <bean name="MoveCostBean" comment="移动消耗配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="cost" type="list,int" comment="消耗值，长度匹配格子表"/>
+    </bean>
+    <bean name="JobRestraintBean" comment="职业克制加成配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="addition" type="list,JobRestraintValue" comment="加成值，长度匹配职业类型"/>
+    </bean>
+    <bean name="LanguageBean" comment="文案配置">
+        <var name="id" type="int#range[1,]"/>
+        <var name="_const" type="string" comment="常量名" group="const" tags="comment=chinese"/>
+        <var name="chinese" type="string" comment="中文"/>
+    </bean>
+    <bean name="CampBean" comment="阵营配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="name" type="int#ref=LanguageTable" comment="名称"/>
+        <var name="opponent" type="(list#sep=,),int#ref=CampTable" comment="对手阵营id"/>
+        <var name="actorFlipX" type="bool" comment="Actor翻转x轴"/>
+        <var name="actionPriority" type="int" comment="行动优先级，值越大越早行动"/>
+        <var name="flagIcon" type="SpriteBean" comment="阵营图标"/>
+        <var name="controlColor" type="CfgColor" comment="指挥范围颜色"/>
+        <var name="actorHpColor" type="CfgVerticalVertexGradient" comment="角色生命值颜色"/>
+    </bean>
+    <bean name="HeroBean" comment="英雄配置">
+        <var name="id" type="int#range[1,]"/>
+        <var name="infoId" type="int#ref=HeroInfoTable" comment="英雄信息ID"/>
+        <var name="jobId" type="int#ref=JobTable" comment="职业Id"/>
+        <var name="level" type="int#range[1,]" comment="登场等级"/>
+        <var name="exp" type="int#range[1,]" comment="登场经验值"/>
+        <var name="soldiers" type="(list#sep=,),int#ref=JobTable" comment="登场时携带士兵"/>
+        <var name="canUseSoldiers" type="(list#sep=,),int#ref=JobTable" comment="可雇佣士兵"/>
+        <var name="mana" type="(list#sep=,),int#ref=ManaTable" comment="携带魔法"/>
+        <var name="attribute" type="list,AttributeValue" comment="属性"/>
+        <var name="controlAttribute" type="list,AttributeValue" comment="指挥属性"/>
+    </bean>
+    <bean name="HeroInfoBean" comment="英雄信息配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="name" type="int#ref=LanguageTable" comment="名称"/>
+        <var name="levelUpHead" type="SpriteBean" comment="升级时显示头像"/>
+    </bean>
+    <bean name="JobBean" comment="职业配置">
+        <var name="id" type="int#range=[1,]"/>
+    </bean>
+    <bean name="ManaBean" comment="魔法配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="name" type="int#ref=LanguageTable" comment="名称"/>
+        <var name="costMp" type="int#range=[0,]" comment="魔力值消耗"/>
+    </bean>
+    <bean name="LevelBean" comment="关卡配置">
+        <var name="id" type="int#range=[1,]"/>
+        <var name="name" type="int#ref=LanguageTable" comment="名称"/>
+    </bean>
+    <bean name="LevelHeroBean" comment="关卡英雄配置">
+        <var name="level" type="int#ref=LevelTable" comment="关卡Id" tags="index=multiple"/>
+        <var name="hero" type="int#ref=HeroTable" comment="英雄Id"/>
+        <var name="position" type="CfgVector2Int" comment="位置"/>
+        <var name="camp" type="int#ref=CampTable" comment="阵营Id"/>
+    </bean>
+</module>

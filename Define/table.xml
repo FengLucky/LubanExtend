@@ -1,0 +1,31 @@
+<module
+        xmlns="table"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="table ~table.xsd"
+        name="">
+    <table name="PageTable" value="PageBean" input="CSV/界面配置.csv"/>
+    <table name="TileAdditionTable" value="TileAdditionBean" input="CSV/地形加成.csv"/>
+    <table name="MoveCostTable" value="MoveCostBean" input="CSV/移动消耗.csv"/>
+    <table name="JobRestraintTable" value="JobRestraintBean" input="CSV/职业克制.csv"/>
+    <table name="LanguageTable" value="LanguageBean" input="CSV/Language/文案.csv"/>
+    <table name="AttributeTable" value="AttributeBean" input="CSV/属性.csv"/>
+    <table name="TileTable" value="TileBean" input="CSV/地图块.csv"/>
+    <table name="CampTable" value="CampBean" input="CSV/阵营.csv"/>
+    <table name="HeroTable" value="HeroBean" input="CSV/英雄.csv"/>
+    <table name="HeroInfoTable" value="HeroInfoBean" input="CSV/英雄信息.csv"/>
+    <table name="JobTable" value="JobBean" input="CSV/职业.csv"/>
+    <table name="ManaTable" value="ManaBean" input="CSV/魔法.csv"/>
+    <table name="LevelTable" value="LevelBean" input="CSV/关卡.csv"/>
+    <table name="LevelHeroTable" value="LevelHeroBean" input="CSV/关卡英雄.csv" mode="list"/>
+    
+    <table name="CameraInstance" value="CameraInstanceBean" input="CSV/Instance/相机.csv" mode="one"/>
+    <table name="GameConfig" value="GameConfigBean" input="CSV/Instance/全局配置.csv" mode="one"/>
+    <!--
+    <table name="SkillTrackTable" value="SkillTrackBean" input="Json/*@技能轨道.json"/>
+    <table name="SkillAnimationTable" value="SkillAnimationBean" input="Json/*@技能动画.json"/>
+    <table name="SkillReleaseTable" value="SkillReleaseBean" input="Json/*@技能打击段.json"/>
+    <table name="SkillMoveTable" value="SkillMoveBean" input="Json/*@技能移动.json"/>
+    <table name="SkillRotateTable" value="SkillRotateBean" input="Json/*@技能旋转.json"/>
+    <table name="SkillGroupTable" value="SkillGroupBean" input="Json/*@技能组.json"/>
+    -->
+</module>

@@ -1,0 +1,90 @@
+using System.Collections.Generic;
+using SimpleJSON;
+
+{{namespace_with_grace_begin __namespace}}
+    public partial class {{__name}}
+    {
+        private static System.Func<string, JSONNode> _loader;
+        private static readonly Dictionary<string,int> TableIndex = new();
+    
+        {{~for table in __tables ~}}
+    {{~if table.comment != '' ~}}
+        /// <summary>
+        /// {{escape_comment table.comment}}
+        /// </summary>
+    {{~end~}}
+        public static {{table.full_name}} {{format_property_name __code_style table.name}} {get; } = new();
+        {{~end~}}
+    
+        private static void LoadData(System.Func<string, JSONNode> loader)
+        {
+            _loader = loader;
+            TableIndex.Clear();
+            
+            {{~count=0~}}
+            {{~for table in __tables 
+                count = count +1
+            ~}}
+            {{format_property_name __code_style table.name}}.LoadData(_loader("{{table.output_data_file}}"));
+            {{~end~}}
+            
+            {{~count=0~}}
+            {{~for table in __tables 
+                count = count +1
+            ~}}
+            TableIndex.Add("{{table.output_data_file}}",{{count}});
+            {{~end~}}
+            ResolveRef();
+        }
+    
+        ///<summary>
+        /// 重新加载指定表格
+        ///</summary>
+        private static void IncrementalUpdate(List<string> tables)
+        {
+            foreach(var table in tables)
+            {
+                var index = TableIndex[table];
+                switch(index)
+                {
+                {{~count = 0~}}
+                {{~for table in __tables 
+                    count = count + 1
+                ~}}
+                    case {{count}}:
+                        {{format_property_name __code_style table.name}}.LoadData(_loader("{{table.output_data_file}}"));
+                        break;
+                {{~end~}}
+                }
+            }
+            
+            IncrementalResolveRef(tables);
+        }
+        
+        private static void ResolveRef()
+        {
+            {{~for table in __tables ~}}
+            {{format_property_name __code_style table.name}}.ResolveRef();
+            {{~end~}}
+        }
+    
+        private static void IncrementalResolveRef(List<string> tables)
+        {
+            foreach(var table in tables)
+            {
+                var index = TableIndex[table];
+                switch(index)
+                {
+                {{~count = 0~}}
+                {{~for table in __tables 
+                    count = count + 1
+                ~}}
+                    case {{count}}:
+                        {{format_property_name __code_style table.name}}.ResolveRef();
+                        break;
+                {{~end~}}
+                }
+            }
+        }
+    }
+{{namespace_with_grace_end __namespace}}

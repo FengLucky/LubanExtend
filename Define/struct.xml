@@ -1,0 +1,76 @@
+﻿<?xml version="1.0"?>
+<module
+        xmlns="bean"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="bean ~bean.xsd"
+        name="">
+    <bean name="SpriteBean" comment="精灵图配置" sep="." valueType="true">
+        <var name="atlas" type="string#path=normal;Atlas/*.asset" comment="图集名称" />
+        <var name="sprite" type="string" comment="精灵名称"/>
+    </bean>
+
+    <bean name="JobRestraintValue" comment="职业克制加成" valueType="true">
+        <var name="attack" type="int" comment="攻击加成" />
+        <var name="defence" type="int" comment="防御加成" />
+    </bean>
+    
+    <bean name="AttributeValue" comment="属性值" valueType="true">
+        <var name="id" type="int#ref=AttributeTable" comment="属性id"/>
+        <var name="value" type="int" comment="属性值"/>
+    </bean>
+    
+    <bean name="CfgVector2" sep="," valueType="true">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="UnityEngine.Vector2"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVector2"/>
+        </mapper>
+    </bean>
+
+    <bean name="CfgVector2Int" sep="," valueType="true">
+        <var name="x" type="int"/>
+        <var name="y" type="int"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="UnityEngine.Vector2Int"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVector2Int"/>
+        </mapper>
+    </bean>
+
+    <bean name="CfgVector3" sep="," valueType="true">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+        <var name="z" type="float"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="UnityEngine.Vector3"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVector3"/>
+        </mapper>
+    </bean>
+
+    <bean name="CfgColor" sep="," valueType="true">
+        <var name="r" type="int#range[0,255]"/>
+        <var name="g" type="int#range[0,255]"/>
+        <var name="b" type="int#range[0,255]"/>
+        <var name="a" type="int#range[0,255]"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="UnityEngine.Color"/>
+            <option name="constructor" value="ExternalTypeUtil.NewColor"/>
+        </mapper>
+    </bean>
+    <bean name="CfgVerticalVertexGradient" sep="|" comment="纵向渐变颜色" valueType="true">
+        <var name="top" type="CfgColor" comment="顶部颜色"/>
+        <var name="bottom" type="CfgColor" comment="底部颜色"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="TMPro.VertexGradient"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVertexGradient"/>
+        </mapper>
+    </bean>
+    <bean name="CfgHorizontalVertexGradient" sep="|" comment="横向渐变颜色" valueType="true">
+        <var name="left" type="CfgColor" comment="左侧颜色"/>
+        <var name="right" type="CfgColor" comment="右侧颜色"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="TMPro.VertexGradient"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVertexGradient"/>
+        </mapper>
+    </bean>
+</module>
