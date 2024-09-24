@@ -1,0 +1,18 @@
+<module
+        xmlns="table"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="table ~table.xsd"
+        name="">
+    <table name="MapTable" value="ClassBean" input="CSV/测试.csv"/>
+    <table name="OneTable" value="ValueBean" input="CSV/单例测试.csv" mode="one"/>
+    <table name="InstanceTable" value="InstanceBean" input="CSV/单例测试.csv" mode="one"/>
+    <table name="ListTable" value="ClassBean" input="CSV/测试.csv" mode="list"/>
+    <table name="JsonTable" value="ValueBean" input="Json/*@测试.json"/>
+    <table name="ValueTable" value="ValueBean" input="CSV/值测试.csv"/>
+    <table name="SingleIndexMapTable" value="ClassBean" input="CSV/测试.csv" index="intField"/>
+    <table name="MultiIndexMapTable" value="ClassBean" input="CSV/测试.csv" index="intField,longField"/>
+    <table name="UnionIndexMapTable" value="ClassBean" input="CSV/测试.csv" index="intField+longField"/>
+    <table name="SingleIndexListTable" value="ClassBean" input="CSV/测试.csv" mode="list" index="intField"/>
+    <table name="MultiIndexListTable" value="ClassBean" input="CSV/测试.csv" mode="list" index="intField,longField"/>
+    <table name="UnionIndexListTable" value="ClassBean" input="CSV/测试.csv" mode="list" index="intField+longField"/>
+</module>

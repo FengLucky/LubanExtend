@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<module
+        xmlns="enum"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="enum ~enum.xsd"
+        name="">
+    <enum name="TestEnumType" comment="语言类型">
+        <var name="Enum1" comment="测试枚举" alias="测试枚举1" value="2"/>
+        <var name="Enum2" comment="测试枚举" alias="测试枚举2" value="3"/>
+        <var name="Enum3" comment="测试枚举" alias="测试枚举3" value="4"/>
+        <var name="Enum4" comment="测试枚举" alias="测试枚举4" value="5"/>
+    </enum>
+</module>

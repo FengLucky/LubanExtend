@@ -162,3 +162,5 @@ $RECYCLE.BIN/
 .vscode
 # Rider
 *.idea
+Sample/TestProject/Config
+!Sample/Luban/Bin

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<module
+        xmlns="bean"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="bean ~bean.xsd"
+        name="">
+    <bean name="ClassBean" comment="class 类型">
+        <var name="intField" comment="int 字段" type="int#range=[1,]"/>
+        <var name="longField" comment="long 字段" type="long#range=[1,]" tags="index=multiple"/>
+        <var name="floatField" comment="float 字段" type="float"/>
+        <var name="doubleField" comment="double 字段" type="double"/>
+        <var name="refField" comment="引用其他表id" type="int#ref=ValueTable"/>
+        <var name="constField" comment="生成常量" type="string" group="const" tags="comment=stringField"/>
+        <var name="stringField" comment="string 字段" type="string#path=normal;*.cs"/>
+        <var name="boolField" comment="bool 字段" type="bool"/>
+        <var name="setField" comment="set 字段" type="(set#sep=,),int"/>
+        <var name="mapField" comment="map 字段" type="(map#sep=,),int#ref=ValueTable,int"/>
+        <var name="list1" comment="list 字段,单格配置" type="(list#sep=,),int#ref=ValueTable"/>
+        <var name="list2" comment="list 字段,多格配置" type="list,int#ref=ValueTable"/>
+    </bean>
+    <bean name="ValueBean" comment="值类型" valueType="true">
+        <var name="id" comment="id" type="int"/>
+    </bean>
+    <bean name="InstanceBean" comment="单例配置">
+        <var name="id" comment="id" type="int#ref=MapTable"/>
+    </bean>
+    <bean name="CfgVector3" sep="," valueType="true">
+        <var name="x" type="float"/>
+        <var name="y" type="float"/>
+        <var name="z" type="float"/>
+        <mapper target="client" codeTarget="cs-bin,cs-dotnet-json,cs-simple-json">
+            <option name="type" value="System.Numerics.Vector3"/>
+            <option name="constructor" value="ExternalTypeUtil.NewVector3"/>
+        </mapper>
+    </bean>
+</module>
