@@ -193,6 +193,8 @@ using System.Collections.Generic;
         public {{declaring_type_name field.ctype}} {{format_property_name __code_style field.name}} => _data.{{format_property_name __code_style field.name}};
         {{~if can_generate_ref field~}}
         public {{declaring_type_name (get_ref_type field)}} {{get_ref_name field}} => _data.{{get_ref_name field}};
+        {{~else if can_generate_collection_ref field~}}
+        public {{declaring_collection_ref_name field.ctype}} {{get_ref_name field}}=>_data.{{get_ref_name field}};
         {{~end~}}
         {{~end~}}
         

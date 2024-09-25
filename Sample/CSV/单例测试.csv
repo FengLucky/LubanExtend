@@ -1,2 +1,3 @@
 ##column##var,##,##type,
 id,测试单例备注,"int#range[1,]",1
+value,引用,"(list#sep=,),int#ref=InstanceTable",1

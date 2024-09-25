@@ -24,6 +24,7 @@
     </bean>
     <bean name="InstanceBean" comment="单例配置">
         <var name="id" comment="id" type="int#ref=MapTable"/>
+        <var name="value" comment="引用" type="(list#sep=,),int#ref=ValueTable"/>
     </bean>
     <bean name="CfgVector3" sep="," valueType="true">
         <var name="x" type="float"/>
