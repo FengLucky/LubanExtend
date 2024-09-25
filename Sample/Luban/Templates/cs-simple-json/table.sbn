@@ -1,7 +1,7 @@
 using Luban;
 using SimpleJSON;
+using System.Linq;
 using System.Collections.Generic;
-
 {{~
     func index_type_name
         ret (declaring_type_name $0.type)

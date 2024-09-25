@@ -1,6 +1,6 @@
 using Luban;
+using System.Linq;
 using System.Collections.Generic;
-
 {{ 
     key_type = __table.key_ttype
     value_type =  __table.value_ttype
