@@ -51,11 +51,11 @@ func generate_resolve_field_ref
 		end
     else
         if (is_field_bean_need_resolve_ref field)
-            ret fieldName + '?.ResolveRef(tables);'
+            ret fieldName + '?.ResolveRef();'
         else if (is_field_array_like_need_resolve_ref field)
-            ret 'foreach (var e in ' + fieldName + ') { e?.ResolveRef(tables); }'
+            ret 'foreach (var e in ' + fieldName + ') { e?.ResolveRef(); }'
         else if (is_field_map_need_resolve_ref field)
-            ret 'foreach (var e in ' + fieldName + '.Values) { e?.ResolveRef(tables); }'
+            ret 'foreach (var e in ' + fieldName + '.Values) { e?.ResolveRef(); }'
         else
             ret ''
         end
@@ -69,12 +69,6 @@ end
     public {{if __bean.is_abstract_type}}abstract {{end}}partial class {{__name}} : {{if parent_def_type}}{{__bean.parent}}{{else}}BeanBase{{end}}
 {{~end~}}
     {
-        {{~if !__bean.is_value_type~}}
-        protected {{__name}}() {{if parent_def_type}} : base(null) {{end}}
-        {
-            
-        }
-        {{end}}
         public {{if parent_def_type}} override{{else}}{{if !__bean.is_value_type}} virtual{{end}}{{end}} void LoadData(ByteBuf buf)
         {
             {{~if parent_def_type~}}

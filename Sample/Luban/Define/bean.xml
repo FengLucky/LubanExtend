@@ -13,6 +13,7 @@
         <var name="constField" comment="生成常量" type="string" group="const" tags="comment=stringField"/>
         <var name="stringField" comment="string 字段" type="string#path=normal;*.cs"/>
         <var name="boolField" comment="bool 字段" type="bool"/>
+        <var name="dynamicField" comment="动态类型 字段" type="DynamicBase"/>
         <var name="setField" comment="set 字段" type="(set#sep=,),int"/>
         <var name="mapField" comment="map 字段" type="(map#sep=,),int#ref=ValueTable,int"/>
         <var name="list1" comment="list 字段,单格配置" type="(list#sep=,),int#ref=ValueTable"/>
@@ -32,5 +33,12 @@
             <option name="type" value="System.Numerics.Vector3"/>
             <option name="constructor" value="ExternalTypeUtil.NewVector3"/>
         </mapper>
+    </bean>
+    
+    <bean name="DynamicBase" comment="动态父类型">
+    </bean>
+
+    <bean name="DynamicChild" comment="动态子类型" parent="DynamicBase">
+        <var name="type" type="TestEnumType" comment="伤害类型"/>
     </bean>
 </module>

@@ -52,11 +52,11 @@ func generate_resolve_field_ref
 		end
     else
         if (is_field_bean_need_resolve_ref field)
-            ret fieldName + '?.ResolveRef(tables);'
+            ret fieldName + '?.ResolveRef();'
         else if (is_field_array_like_need_resolve_ref field)
-            ret 'foreach (var e in ' + fieldName + ') { e?.ResolveRef(tables); }'
+            ret 'foreach (var e in ' + fieldName + ') { e?.ResolveRef(); }'
         else if (is_field_map_need_resolve_ref field)
-            ret 'foreach (var e in ' + fieldName + '.Values) { e?.ResolveRef(tables); }'
+            ret 'foreach (var e in ' + fieldName + '.Values) { e?.ResolveRef(); }'
         else
             ret ''
         end

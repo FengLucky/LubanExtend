@@ -1,5 +1,5 @@
-##var,"",intField,longField,floatField,doubleField,refField,constField,stringField,boolField,setField,mapField,list1,[list2,"","",list2]
-##type,,"int#range=[1,]","long#range=[1,]",float,double,int#ref=MapTable,string,string#path=*.cs,bool,"(set#sep=,),int","(map#sep=,),int,int","(list#sep=,),int#ref=MapTable","list,int#ref=MapTable",,,
-##,备注,int 字段,long 字段,float 字段,double 字段,引用其他表id,生成常量,string 字段,bool 字段,set 字段,map 字段,"list 字段,单格配置","list 字段,多格配置",,,
-,测试1,1,1,1.1,2.1,1,Const1,Program,1,"1,2","1,2","1,2",1,2,1,2
-,测试2,2,2,1.2,2.2,1,,Program,FALSE,"1,2","1,2","1,2",2,1,2,1
+##var,,intField,longField,floatField,doubleField,refField,constField,stringField,boolField,[dynamicField,dynamicField],,setField,mapField,list1,[list2,,,list2]
+##type,,"int#range=[1,]","long#range=[1,]",float,double,int#ref=MapTable,string,string#path=*.cs,bool,DynamicBase,,,"(set#sep=,),int","(map#sep=,),int,int","(list#sep=,),int#ref=MapTable","list,int#ref=MapTable",,,
+##,备注,int 字段,long 字段,float 字段,double 字段,引用其他表id,生成常量,string 字段,bool 字段,类型,子类型字段,,set 字段,map 字段,"list 字段,单格配置","list 字段,多格配置",,,
+,测试1,1,1,1.1,2.1,1,Const1,Program,1,DynamicChild,测试枚举1,,"1,2","1,2","1,2",1,2,1,2
+,测试2,2,2,1.2,2.2,1,,Program,FALSE,DynamicChild,测试枚举2,,"1,2","1,2","1,2",2,1,2,1
