@@ -103,7 +103,7 @@ using System.Collections.Generic;
             return configs;
         }  
         {{~else if __table.is_list_table ~}}
-        private readonly List<{{declaring_type_name __value_type}}> _dataList;
+        private readonly List<{{declaring_type_name __value_type}}> _dataList = new();
         {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
         {{~if field.tags['index'] == 'multiple'~}}     
         private readonly Dictionary<{{declaring_type_name field.ctype}}, List<{{declaring_type_name __value_type}}>> _dataMap{{format_property_name __code_style field.name}} = new();
@@ -234,7 +234,7 @@ using System.Collections.Generic;
         }
         {{~else~}}
     
-        private {{declaring_type_name __value_type}} _data;
+        private {{declaring_type_name __value_type}} _data = new();
     
         public void LoadData(JSONNode buf)
         {
