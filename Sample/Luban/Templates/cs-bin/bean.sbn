@@ -78,8 +78,10 @@ end
                 fieldName = format_property_name __code_style field.name
              ~}}
             {{deserialize 'buf' fieldName field.ctype}}
+            {{~if !__bean.is_value_type~}}
             {{~if can_generate_ref field~}}
             {{get_ref_name field}} = default;
+            {{~end~}}
             {{~end~}}
             {{~if has_index field~}}
             foreach(var v in {{fieldName}})
@@ -121,10 +123,12 @@ end
         [ConfigField]
         [OriginalFieldName("{{field.name}}")]
         public {{declaring_type_name field.ctype}} {{format_property_name __code_style field.name}};
+        {{~if !__bean.is_value_type~}}
         {{~if can_generate_ref field~}}
         public {{declaring_type_name (get_ref_type field)}} {{get_ref_name field}};
         {{~else if can_generate_collection_ref field~}}
         public {{declaring_collection_ref_name field.ctype}} {{get_ref_name field}};
+        {{~end~}}
         {{~end~}}
        {{~if has_index field
             indexMapType = get_index_map_type field
@@ -137,7 +141,7 @@ end
         public const int TypeID = {{__bean.id}};
         public override int GetTypeId() => TypeID;
     {{~end~}}
-    
+        {{~if !__bean.is_value_type~}}
         public {{method_modifier __bean}} void ResolveRef()
         {
             {{~if parent_def_type~}}
@@ -150,6 +154,7 @@ end
                     {{~end~}}
             {{~end~}}
         }
+        {{~end~}}
     
         public override string ToString()
         {
