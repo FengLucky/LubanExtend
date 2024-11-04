@@ -1,0 +1,280 @@
+using Luban;
+using SimpleJSON;
+using System.Linq;
+using System.Collections.Generic;
+{{~
+    func index_type_name
+        ret (declaring_type_name $0.type)
+    end
+    
+    func table_union_map_type_name
+        ret 'Dictionary<(' + (array.each __table.index_list @index_type_name | array.join ', ') + '), ' + (declaring_type_name __value_type)  + '>'
+    end
+
+    func table_key_list
+        varName = $0
+        indexList = __table.index_list |array.each do; ret varName + '.' + (format_property_name __code_style $0.index_field.name); end;
+        ret array.join indexList ', '
+    end
+    
+    func table_param_def_list
+        paramList = __table.index_list |array.each do; ret (declaring_type_name $0.type) + ' ' + $0.index_field.name; end
+        ret array.join paramList ', '
+    end
+    
+    func table_param_name_list
+        paramList = __table.index_list |array.each do; ret $0.index_field.name; end
+        ret array.join paramList ', '
+    end
+    
+    func get_ref_name 
+        ret (format_property_name __code_style $0.name) + 'Ref'
+    end
+~}}
+{{namespace_with_grace_begin __namespace_with_top_module}}
+    {{~if __table.comment != '' ~}}
+    /// <summary>
+    /// {{escape_comment __table.comment}}
+    /// </summary>
+    {{~end~}}
+    {{~for file in __table.input_files~}}
+    [ConfigFilePath("{{file}}")]
+    {{~end~}}
+    public partial class {{__name}} : TableBase
+    {
+        {{~if __table.is_map_table ~}}
+        private readonly Dictionary<{{declaring_type_name __key_type}}, {{declaring_type_name __value_type}}> _dataMap = new();
+        private readonly List<{{declaring_type_name __value_type}}> _dataList = new();
+        
+        public void LoadData(JSONNode buf)
+        {
+            _dataList.Clear();
+            
+            foreach(JSONNode ele in buf.Children)
+            {
+                {{declaring_type_name __value_type}} v;
+                
+                {{declaring_type_name __table.index_field.ctype}} key;
+                {{deserialize_field 'key' 'ele' __table.index_field.name __table.index_field.ctype}}
+                if(_dataMap.TryGetValue(key,out v))
+                {
+                    v.LoadData(ele);
+                }
+                else
+                {
+                    {{deserialize 'v' 'ele' __value_type}}
+                    _dataMap.Add(v.{{format_property_name __code_style __table.index_field.name}}, v);
+                }
+    
+                _dataList.Add(v);
+            }
+        }
+    
+        public Dictionary<{{declaring_type_name __key_type}}, {{declaring_type_name __value_type}}> DataMap => _dataMap;
+        public List<{{declaring_type_name __value_type}}> DataList => _dataList;
+    
+    {{~if __value_type.is_dynamic~}}
+        public T GetOrDefaultAs<T>({{declaring_type_name __key_type}} key) where T : {{declaring_type_name __value_type}} => _dataMap.GetValueOrDefault(key);
+        public T GetAs<T>({{declaring_type_name __key_type}} key) where T : {{declaring_type_name __value_type}} => (T)_dataMap[key];
+    {{~end~}}
+        public {{declaring_type_name __value_type}} GetOrDefault({{declaring_type_name __key_type}} key) => _dataMap.GetValueOrDefault(key);
+        public {{declaring_type_name __value_type}} Get({{declaring_type_name __key_type}} key) => _dataMap[key];
+        public {{declaring_type_name __value_type}} this[{{declaring_type_name __key_type}} key] => _dataMap[key];
+    
+        public void ResolveRef()
+        {
+            foreach(var v in _dataList)
+            {
+                v.ResolveRef();
+            }
+        }
+        
+        public override void PreExport()
+        {
+            DataList.Clear();
+            DataList.AddRange(DataMap.Values);
+            DataList.Sort((a,b)=>a.{{format_property_name __code_style __table.index_field.name}}.CompareTo(b.{{format_property_name __code_style __table.index_field.name}}));
+        }
+        
+        public override List<object> GetConfigList()
+        {
+            List<object> configs = new();
+            configs.AddRange(DataList.OfType<object>());
+            return configs;
+        }  
+        {{~else if __table.is_list_table ~}}
+        private readonly List<{{declaring_type_name __value_type}}> _dataList = new();
+        {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
+        {{~if field.tags['index'] == 'multiple'~}}     
+        private readonly Dictionary<{{declaring_type_name field.ctype}}, List<{{declaring_type_name __value_type}}>> _dataMap{{format_property_name __code_style field.name}} = new();
+        {{~end~}}
+        {{~end~}}
+        {{~if __table.is_union_index~}}
+        private {{table_union_map_type_name}} _dataMapUnion = new();
+        {{~else if !__table.index_list.empty?~}}
+        {{~for idx in __table.index_list~}}
+        private readonly Dictionary<{{declaring_type_name idx.type}}, {{declaring_type_name __value_type}}> _dataMap_{{idx.index_field.name}} = new();
+        {{~end~}}
+        {{~end~}}
+    
+        public void LoadData(JSONNode buf)
+        {
+            _dataList.Clear();
+            {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
+            {{~if field.tags['index'] == 'multiple'~}}     
+            _dataMap{{format_property_name __code_style field.name}}.Clear();
+            {{~end~}}
+            {{~end~}}           
+            {{~if !__table.is_union_index && !__table.index_list.empty?
+                count = 0
+                for idx in __table.index_list
+                    count = count + 1
+                    if count != 1
+            ~}}
+            _dataMap_{{idx.index_field.name}}.Clear();
+            {{~
+                    end
+                end
+            end
+            ~}}
+            
+            foreach(JSONNode ele in buf.Children)
+            {
+                {{declaring_type_name __value_type}} v;
+            {{~if __table.is_union_index~}}
+                {{~
+                count = 0
+                for idx in __table.index_list
+                    count = count + 1
+                ~}}
+                
+                {{declaring_type_name __table.index_field.ctype}} {{idx.index_field.name}};
+                {{deserialize_field idx.index_field.name 'ele' idx.index_field.name idx.index_field.ctype}}
+                {{~end~}}
+                var key = (
+                    {{~
+                    for idx in __table.index_list
+                        count = count - 1
+                    ~}}
+                    {{idx.index_field.name}}{{if count>0}},
+                    {{~end~}}
+                    {{~end~}}
+                
+                );
+    
+                if(_dataMapUnion.TryGetValue(key,out v))
+                {             
+                    v.LoadData(ele);
+                }
+                else
+                {
+                    {{deserialize 'v' 'ele' __value_type}}
+                    _dataMapUnion.Add(key, v);
+                }
+            {{~else if !__table.index_list.empty?~}}
+                {{~
+                count = 0
+                for idx in __table.index_list
+                count = count + 1
+                ~}}
+                {{~if count == 1~}}
+                
+                {{declaring_type_name __table.index_field.ctype}} key;
+                {{deserialize_field 'key' 'ele' idx.index_field.name idx.index_field.ctype}}
+                if(_dataMap_{{idx.index_field.name}}.TryGetValue(key,out v))
+                {
+                    v.LoadData(ele);
+                }
+                else
+                {
+                    {{deserialize 'v' 'ele' __value_type}}
+                    _dataMap_{{idx.index_field.name}}.Add(key, v);
+                }
+                {{~else~}}
+                _dataMap_{{idx.index_field.name}}.Add(v.{{format_property_name __code_style idx.index_field.name}}, v);
+                {{~end~}}
+                {{~end~}}
+            {{~else~}}
+                {{deserialize 'v' 'ele' __value_type}}
+            {{~end~}}
+            {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
+                {{~if field.tags['index'] == 'multiple'~}}     
+                if(!_dataMap{{format_property_name __code_style field.name}}.TryGetValue(v.{{format_property_name __code_style field.name}},out var {{field.name}}List))
+                {
+                    {{field.name}}List = new();
+                    _dataMap{{format_property_name __code_style field.name}}.Add(v.{{format_property_name __code_style field.name}},{{field.name}}List);
+                }
+                {{field.name}}List.Add(v);
+                {{~end~}}
+            {{~end~}}           
+                _dataList.Add(v);
+            }
+        }
+    
+        public List<{{declaring_type_name __value_type}}> DataList => _dataList;
+        {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
+        {{~if field.tags['index'] == 'multiple'~}}     
+        public List<{{declaring_type_name __value_type}}> GetListBy{{format_property_name __code_style field.name}}({{declaring_type_name field.ctype}} key) => _dataMap{{format_property_name __code_style field.name}}.GetValueOrDefault(key);
+        {{~end~}}
+        {{~end~}}
+        {{~if __table.is_union_index~}}
+        public {{declaring_type_name __value_type}} Get({{table_param_def_list}}) => _dataMapUnion.GetValueOrDefault(({{table_param_name_list}}));
+        {{~else if !__table.index_list.empty? ~}}
+            {{~for idx in __table.index_list~}}
+        public {{declaring_type_name __value_type}} GetBy{{format_property_name __code_style idx.index_field.name}}({{declaring_type_name idx.type}} key) => _dataMap_{{idx.index_field.name}}.GetValueOrDefault(key);
+            {{~end~}}
+        {{~end~}}
+       
+        public void ResolveRef()
+        {
+            foreach(var v in _dataList)
+            {
+                v.ResolveRef();
+            }
+        }
+        {{~else~}}
+    
+        private {{declaring_type_name __value_type}} _data = new();
+    
+        public void LoadData(JSONNode buf)
+        {
+            int n = buf.Count;
+            if (n != 1) 
+            {
+                throw new SerializationException("table mode=one, but size != 1");
+            }
+            {{~if __value_type.def_bean.is_value_type~}}
+            _data.LoadData(buf[0]);
+            {{~else~}}
+            if(_data == null)
+            {
+                {{deserialize '_data' 'buf[0]' __value_type}}
+            }
+            else
+            {
+                _data.LoadData(buf[0]);
+            }
+            {{~end~}}
+        }
+    
+        {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
+    {{~if field.comment != '' ~}}
+        /// <summary>
+        /// {{escape_comment field.comment}}
+        /// </summary>
+    {{~end~}}
+        public {{declaring_type_name field.ctype}} {{format_property_name __code_style field.name}} => _data.{{format_property_name __code_style field.name}};
+        {{~if can_generate_ref field~}}
+        public {{declaring_type_name (get_ref_type field)}} {{get_ref_name field}} => _data.{{get_ref_name field}};
+        {{~else if can_generate_collection_ref field~}}
+        public {{declaring_collection_ref_name field.ctype}} {{get_ref_name field}}=>_data.{{get_ref_name field}};
+        {{~end~}}
+        {{~end~}}
+        
+        public void ResolveRef()
+        {
+            _data.ResolveRef();
+        }
+        {{~end~}}
+    }
+{{namespace_with_grace_end __namespace_with_top_module}}
