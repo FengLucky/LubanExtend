@@ -1,7 +1,7 @@
 dotnet Luban/Bin/Luban.dll ^
 -t client ^
 --conf Luban/luban.conf ^
---customTemplateDir Luban/Templates ^
+--customTemplateDir ../Templates ^
 -x outputCodeDir=TestProject/Config/GenCode ^
 -x pathValidator.rootDir=TestProject ^
 -c cs-bin ^
