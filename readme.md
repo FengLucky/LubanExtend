@@ -26,3 +26,6 @@ public void AddFile(OutputFile file)
 - 常量代码导出路径需要单独一个文件夹，不能和代码导出路径或者数据导出路径在同一个目录，否则会被鲁班自动删除
 ### 代码模板
 - 一个索引值索引多条配置：字段 `tags` 添加 `index=multiple`，仅在表的 `mode` 为 `list` 时生效。可给多个字段配置`tags`
+### 测试工程使用方法
+- 自行构建鲁班可执行文件放到`Sample/Luban/Bin`目录下
+- 双击运行 `打表-bin.bat`或`打表-json.bat`
