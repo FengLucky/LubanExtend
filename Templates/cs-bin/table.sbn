@@ -75,10 +75,12 @@ using System.Collections.Generic;
     
         public void ResolveRef()
         {
+            {{~if !__value_type.def_bean.is_value_type~}}
             foreach(var v in _dataList)
             {
                 v.ResolveRef();
             }
+            {{~end~}}
         }
         
         public override void PreExport()
@@ -168,10 +170,12 @@ using System.Collections.Generic;
         
         public void ResolveRef()
         {
+            {{~if !__value_type.def_bean.is_value_type~}}
             foreach(var v in _dataList)
             {
                 v.ResolveRef();
             }
+            {{~end~}}
         }
         {{~else~}}
     
@@ -200,7 +204,9 @@ using System.Collections.Generic;
         
         public void ResolveRef()
         {
+            {{~if !__value_type.def_bean.is_value_type~}}
             _data.ResolveRef();
+            {{~end~}}
         }
         {{~end~}}
     }
