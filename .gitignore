@@ -163,4 +163,4 @@ $RECYCLE.BIN/
 # Rider
 *.idea
 Sample/TestProject/Config/*
-!Sample/Luban/Bin
+Build
