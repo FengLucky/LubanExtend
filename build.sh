@@ -44,22 +44,7 @@ if [ ! -d "$build_dir/$luban_name" ]; then
         echo "克隆 luban 项目失败"
         exit 1
     }
-
-    cp -r "Module/Luban.DataTarget.Const" "$build_dir/luban/src/Luban.DataTarget.Const" || {
-        echo "复制插件项目失败，请清理 $build_dir 目录后重试"
-        exit 1
-    }
-
-    (cd "$build_dir/luban/src" && \
-    dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj && \
-    cd Luban.DataTarget.Const && \
-    dotnet add reference ../Luban.Core/Luban.Core.csproj && \
-    cd .. && \
-    cd Luban && \
-    dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj) || {
-        echo "添加项目引用失败"
-        exit 1
-    }
+    
 else
     echo "开始更新项目"
     (cd "$build_dir/luban" && git pull) || {
@@ -67,6 +52,22 @@ else
         exit 1
     }
 fi
+
+cp -r "Module" "$build_dir/luban/src" || {
+    echo "复制插件项目失败，请清理 $build_dir 目录后重试"
+    exit 1
+}
+
+(cd "$build_dir/luban/src" && \
+dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj && \
+cd Luban.DataTarget.Const && \
+dotnet add reference ../Luban.Core/Luban.Core.csproj && \
+cd .. && \
+cd Luban && \
+dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj) || {
+    echo "添加项目引用失败"
+    exit 1
+}
 
 # 编译项目
 (cd "$build_dir/luban/src" && \

@@ -49,27 +49,7 @@ if not exist "%build_dir%/%luban_name%" (
 	)
 	
 	cd ../
-	xcopy "Module\Luban.DataTarget.Const" "%build_dir%\luban\src\Luban.DataTarget.Const" /E /I
-	if %errorlevel% neq 0 (
-		echo 复制 插件 项目失败，请清理 %build_dir% 目录后重试
-		exit /b 1
-	)
 	
-	cd %build_dir%\luban\src
-	dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
-	
-	REM 添加扩展项目项目对LuBan.Core的引用
-	cd Luban.DataTarget.Const
-	dotnet add reference ../Luban.Core/Luban.Core.csproj
-	cd ../
-	
-    REM 添加 Luban 对扩展项目的引用
-    cd Luban
-    dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
-    cd ../
-
-    REM 返回初始目录
-    cd ../../../
 ) else (
     echo 开始更新项目
     cd %build_dir%
@@ -80,6 +60,28 @@ if not exist "%build_dir%/%luban_name%" (
 	)
 	cd ../
 )
+
+xcopy "Module" "%build_dir%\luban\src" /E /I /Y
+if %errorlevel% neq 0 (
+    echo 复制 插件 项目失败，请清理 %build_dir% 目录后重试
+    exit /b 1
+)
+
+cd %build_dir%\luban\src
+dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
+
+REM 添加扩展项目项目对LuBan.Core的引用
+cd Luban.DataTarget.Const
+dotnet add reference ../Luban.Core/Luban.Core.csproj
+cd ../
+
+REM 添加 Luban 对扩展项目的引用
+cd Luban
+dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
+cd ../
+
+REM 返回初始目录
+cd ../../../
 
 cd %build_dir%\luban\src
 dotnet publish Luban/Luban.csproj -c Release -o ../../publish -r win-x64 -p:DebugType=none  --self-contained true
