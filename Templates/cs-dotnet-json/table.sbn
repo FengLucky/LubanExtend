@@ -1,5 +1,5 @@
 using Luban;
-using SimpleJSON;
+using System.Text.Json;
 using System.Linq;
 using System.Collections.Generic;
 {{~
@@ -46,11 +46,11 @@ using System.Collections.Generic;
         private readonly Dictionary<{{declaring_type_name __key_type}}, {{declaring_type_name __value_type}}> _dataMap = new();
         private readonly List<{{declaring_type_name __value_type}}> _dataList = new();
         
-        public void LoadData(JSONNode buf)
+        public void LoadData(JsonElement buf)
         {
             _dataList.Clear();
             
-            foreach(var ele in buf.Children)
+            foreach(var ele in buf.EnumerateArray())
             {
                 {{declaring_type_name __value_type}} v;
                 
@@ -119,7 +119,7 @@ using System.Collections.Generic;
         {{~end~}}
         {{~end~}}
     
-        public void LoadData(JSONNode buf)
+        public void LoadData(JsonElement buf)
         {
             _dataList.Clear();
             {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
@@ -140,7 +140,7 @@ using System.Collections.Generic;
             end
             ~}}
             
-            foreach(var ele in buf.Children)
+            foreach(var ele in buf.EnumerateArray())
             {
                 {{declaring_type_name __value_type}} v;
             {{~if __table.is_union_index~}}
@@ -149,8 +149,7 @@ using System.Collections.Generic;
                 for idx in __table.index_list
                     count = count + 1
                 ~}}
-                {{declaring_type_name idx.index_field.ctype}} {{idx.index_field.name}};
-                {{deserialize_field idx.index_field.name 'ele' idx.index_field.name idx.index_field.ctype}}
+                var {{deserialize_field idx.index_field.name 'ele' idx.index_field.name idx.index_field.ctype}}
                 {{~end~}}
                 
                 var key = (
@@ -240,9 +239,9 @@ using System.Collections.Generic;
     
         private {{declaring_type_name __value_type}} _data = new();
     
-        public void LoadData(JSONNode buf)
+        public void LoadData(JsonElement buf)
         {
-            int n = buf.Count;
+            int n = buf.GetArrayLength();
             if (n != 1) 
             {
                 throw new SerializationException("table mode=one, but size != 1");

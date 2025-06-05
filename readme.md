@@ -17,7 +17,7 @@ public void AddFile(OutputFile file)
 }
 ```
 运行 **build.bat** 或 **build.sh** <br/>
-Building/publish 目录下会生成一份自包含依赖的 **exe** 和 **dll** 文件
+Building/publish 目录下会生成一份 **dll** 文件
 ### `Luban.Data.Target.Const` 构建数据同时构建和索引绑定的常量代码
 仅支持单索引，且索引类型为`short` `int` `long` `string`
 #### 使用方法

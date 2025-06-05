@@ -84,7 +84,7 @@ REM 返回初始目录
 cd ../../../
 
 cd %build_dir%\luban\src
-dotnet publish Luban/Luban.csproj -c Release -o ../../publish -r win-x64 -p:DebugType=none  --self-contained true
+dotnet publish Luban/Luban.csproj -c Release -o ../../publish -p:DebugType=none
 if %errorlevel% neq 0 (
 	echo 编译 luban 项目失败
 	exit /b 1

@@ -1,5 +1,5 @@
-using Luban;
-using SimpleJSON;
+﻿using Luban;
+using System.Text.Json;
 {{
     parent_def_type = __bean.parent_def_type
     export_fields = __bean.export_fields
@@ -70,7 +70,7 @@ end
     public {{if __bean.is_abstract_type}}abstract {{end}}partial class {{__name}} : {{if parent_def_type}}{{__bean.parent}}{{else}}BeanBase{{end}}
     {{~end~}}
     {
-        public{{if parent_def_type}} override{{else}}{{if !__bean.is_value_type}} virtual{{end}}{{end}} void LoadData(JSONNode buf)
+        public{{if parent_def_type}} override{{else}}{{if !__bean.is_value_type}} virtual{{end}}{{end}} void LoadData(JsonElement buf)
         {
             {{~if parent_def_type~}}
             base.LoadData(buf);
@@ -93,10 +93,10 @@ end
             {{~end~}}
         }
     
-        public static {{__name}} Deserialize{{__name}}(JSONNode buf)
+        public static {{__name}} Deserialize{{__name}}(JsonElement buf)
         {
         {{~if __bean.is_abstract_type~}}
-            switch ((string)buf["$type"])
+            switch (buf.GetProperty("$type").GetString())
             {
             {{~for child in __bean.hierarchy_not_abstract_children~}}
                 case "{{impl_data_type child __bean}}": 
