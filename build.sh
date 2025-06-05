@@ -53,7 +53,7 @@ else
     }
 fi
 
-cp -r "Module" "$build_dir/luban/src" || {
+cp -r Module/* "$build_dir/luban/src/" || {
     echo "复制插件项目失败，请清理 $build_dir 目录后重试"
     exit 1
 }
