@@ -9,6 +9,8 @@ luban_name="luban"
 # 设置UTF-8环境
 export LANG=C.UTF-8
 
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
 # 检测 dotnet 版本
 if ! command -v dotnet &> /dev/null; then
     echo "未安装 dotnet"

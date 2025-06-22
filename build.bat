@@ -9,6 +9,8 @@ set luban_name="luban"
 REM 更改代码页为 UTF-8
 chcp 65001 >nul
 
+cd /d %~dp0
+
 REM 检测 dotnet 版本
 REM 运行 dotnet --version 并捕获输出
 for /f "delims=" %%i in ('dotnet --version') do set dotnet_version=%%i
