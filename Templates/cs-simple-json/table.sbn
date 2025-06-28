@@ -38,7 +38,7 @@ using System.Collections.Generic;
     /// </summary>
     {{~end~}}
     {{~for file in __table.input_files~}}
-    [ConfigFilePath("{{file}}")]
+    [ConfigFilePath("{{file | string.replace "\\" "/"}}")]
     {{~end~}}
     public partial class {{__name}} : TableBase
     {
