@@ -27,7 +27,7 @@ Build/publish 目录下会生成一份 `dll` 文件
     {"names":["const"],"default":true}
 ]
 ```
-## Luban.Schema.LF
+## `Luban.Schema.LF`
 #### 自动导入 table
 
 | 参数                 | 默认值 | 描述                              | 示例                                              |
@@ -38,6 +38,7 @@ Build/publish 目录下会生成一份 `dll` 文件
 | tableImporter.tableNameFormat | {0}Table | 表名格式字符串 | -x tableImporter.tableNameFormat=Table{0}       |
 | tableImporter.valueTypeNameFormat | {0}Bean | 值类型名格式字符串 | -x tableImporter.valueTypeNameFormat={0}VO      |
 | tableImporter.tableMeta | | 表的额外信息配置文件，可配置文件名到 table 名的映射、mode、index、tags 等信息 | -x tableImporter.tableMeta=TableMeta.ini        |
+
 `table meta` 配置格式如下:
 ```ini
 # 注释行，仅支持 # 开头的行作为注释
