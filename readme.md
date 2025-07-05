@@ -54,6 +54,7 @@ Build/publish 目录下会生成一份 `dll` 文件
 ```
 ## 代码模板
 - 一个索引值索引多条配置：字段 `tags` 添加 `index=multiple`，仅在表的 `mode` 为 `list` 时生效。可给多个字段配置`tags`
+- C# json 代码支持运行时热重载,需自己实现文件变化监听方法，然后调用 Tables.IncrementalUpdate 方法进行增量更新
 ## 测试工程使用方法
 - 自行构建鲁班可执行文件放到`Sample/Luban/Bin`目录下
 - 双击运行 `打表-bin.bat`或`打表-json.bat`
