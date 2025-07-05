@@ -50,7 +50,7 @@ Build/publish 目录下会生成一份 `dll` 文件
 # index 为索引字段
 # tags 为自定义标签
 
-道具表=name=Item@mode=list@index=id@tags=index=multiple
+道具表@name=Item@mode=list@index=id@tags=index=multiple
 ```
 ## 代码模板
 - 一个索引值索引多条配置：字段 `tags` 添加 `index=multiple`，仅在表的 `mode` 为 `list` 时生效。可给多个字段配置`tags`
