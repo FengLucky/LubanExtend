@@ -62,11 +62,11 @@ cp -r Module/* "$build_dir/luban/src/" || {
 
 (cd "$build_dir/luban/src" && \
 dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj && \
-cd Luban.DataTarget.Const && \
-dotnet add reference ../Luban.Core/Luban.Core.csproj && \
-cd .. && \
+dotnet sln add Luban.Schema.LF/Luban.Schema.LF.csproj && \
 cd Luban && \
-dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj) || {
+dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj && \
+dotnet add reference ../Luban.Schema.LF/Luban.Schema.LF.csproj \
+) || {
     echo "添加项目引用失败"
     exit 1
 }
