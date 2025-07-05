@@ -112,23 +112,23 @@ public class LFAutoTableImporter : ITableImporter
             string relativePath = file.Substring(dataDir.Length + 1).TrimStart('\\').TrimStart('/');
             string namespaceFromRelativePath = Path.GetDirectoryName(relativePath).Replace('/', '.').Replace('\\', '.');
             
-            var fileWithoutPrefixExt = fileName.Substring(1).TrimStart('.');
+            var fileWithoutPrefixExt = Path.GetFileNameWithoutExtension(fileName.Substring(1));
             var mode = TableMode.MAP;
             var tags = new Dictionary<string, string>();
             var index = "";
-            string tableName = fileWithoutPrefixExt;
-
+            var originName = fileWithoutPrefixExt;
+            var tableName = string.Format(tableNameFormatStr, originName);
             if (_tableMetas.TryGetValue(fileWithoutPrefixExt, out var meta))
             {
-                tableName = !string.IsNullOrWhiteSpace(meta.name) ? meta.name :tableName;
+                originName = !string.IsNullOrWhiteSpace(meta.name) ? meta.name :originName;
+                tableName = string.Format(tableNameFormatStr, originName);
                 index = meta.index;
                 mode = SchemaLoaderUtil.ConvertMode(file,tableName,meta.mode,meta.index);
                 tags = DefUtil.ParseAttrs(meta.tags);
             }
             
-            tableName = string.Format(tableNameFormatStr, tableName);
-            string tableNamespace = string.Format(tableNamespaceFormatStr, namespaceFromRelativePath,fileWithoutPrefixExt);
-            string valueTypeFullName = TypeUtil.MakeFullName(tableNamespace, string.Format(valueTypeNameFormatStr, tableName));
+            string tableNamespace = string.Format(tableNamespaceFormatStr, namespaceFromRelativePath,tableName);
+            string valueTypeFullName = TypeUtil.MakeFullName(tableNamespace, string.Format(valueTypeNameFormatStr, originName));
             
             var table = new RawTable
             {
