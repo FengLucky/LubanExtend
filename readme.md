@@ -30,15 +30,14 @@ Build/publish 目录下会生成一份 `dll` 文件
 ## `Luban.Schema.LF`
 #### 自动导入 table
 
-| 参数                 | 默认值      | 描述                                                | 示例                                            |
-|--------------------|----------|---------------------------------------------------|-----------------------------------------------|
-| tableImporter.name | lf       | 使用的导入器名称，该值必须配置且为 `lf`                            | -x tableImporter.name=lf                      |
-| tableImporter.filePrefix | #        | 自动导入文件前缀，支持配置多个前缀，但是文件名只识别第一个字符                   | -x tableImporter.filePrefix=#$_               |
-| tableImporter.tableNamespaceFormat | Table    | 命名空间格式字符串，第一个参数为文件夹路径，第二个参数为文件名                   | -x tableImporter.tableNamespaceFormat={0}.{1} |
-| tableImporter.valueTypeNamespaceFormat | Bean | 值类型命名空间格式字符串，参数为文件名                   | -x tableImporter.valueTypeNamespaceFormat={0} |
-| tableImporter.tableNameFormat | {0}Table | 表名格式字符串                                           | -x tableImporter.tableNameFormat=Table{0}     |
-| tableImporter.valueTypeNameFormat | {0}Bean  | 值类型名格式字符串                                         | -x tableImporter.valueTypeNameFormat={0}VO    |
-| tableImporter.tableMeta |          | 表的额外信息配置文件，可配置文件名到 table 名的映射、mode、index、tags 等信息 | -x tableImporter.tableMeta=TableMeta.ini      |
+| 参数                 | 默认值 | 描述                                                | 示例                                              |
+|--------------------|-----|---------------------------------------------------|-------------------------------------------------|
+| tableImporter.name | lf  | 使用的导入器名称，该值必须配置且为 `lf`                            | -x tableImporter.name=lf                        |
+| tableImporter.filePrefix | #   | 自动导入文件前缀，支持配置多个前缀，但是文件名只识别第一个字符                   | -x tableImporter.filePrefix=#$_                 |
+| tableImporter.tableNamespaceFormat | | 命名空间格式字符串，第一个参数为文件夹路径，第二个参数为文件名                   | -x tableImporter.tableNamespaceFormat={0}.{1}   |
+| tableImporter.tableNameFormat | {0}Table | 表名格式字符串                                           | -x tableImporter.tableNameFormat=Table{0}       |
+| tableImporter.valueTypeNameFormat | {0}Bean | 值类型名格式字符串                                         | -x tableImporter.valueTypeNameFormat={0}VO      |
+| tableImporter.tableMeta | | 表的额外信息配置文件，可配置文件名到 table 名的映射、mode、index、tags 等信息 | -x tableImporter.tableMeta=TableMeta.ini        |
 
 `table meta` 配置格式如下:
 ```ini

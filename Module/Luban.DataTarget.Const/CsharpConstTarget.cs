@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Luban.Datas;
 using Luban.Defs;
-using Luban.Utils;
 using NLog;
 
 namespace Luban.DataTarget.Const;
@@ -39,7 +38,7 @@ public class CsharpConstTarget: ConstTargetBase
         var sb = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(table.NamespaceWithTopModule))
         {
-            sb.Append("namespace ").Append(TypeUtil.MakeNamespace(GenerationContext.Current.TopModule,"Const")).AppendLine();
+            sb.Append("namespace ").Append(table.NamespaceWithTopModule).AppendLine();
             sb.Append("{").AppendLine();
             indent++;
         }

@@ -88,8 +88,7 @@ public class LFAutoTableImporter : ITableImporter
         string dataDir = GenerationContext.GlobalConf.InputDataDir;
 
         string fileNamePrefixStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "filePrefix", false, "#");
-        string tableNamespaceFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "tableNamespaceFormat", false, "Table");
-        string valueTypeNamespaceFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "valueTypeNamespaceFormat", false, "Bean");
+        string tableNamespaceFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "tableNamespaceFormat", false, "");
         string tableNameFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "tableNameFormat", false, "{0}Table");
         string valueTypeNameFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "valueTypeNameFormat", false, "{0}Bean");
         var excelExts = new HashSet<string> { "xlsx", "xls", "xlsm", "csv" };
@@ -129,7 +128,7 @@ public class LFAutoTableImporter : ITableImporter
             }
             
             string tableNamespace = string.Format(tableNamespaceFormatStr, namespaceFromRelativePath,tableName);
-            string valueTypeFullName = TypeUtil.MakeFullName(string.Format(valueTypeNamespaceFormatStr,originName), string.Format(valueTypeNameFormatStr, originName));
+            string valueTypeFullName = TypeUtil.MakeFullName(tableNamespace, string.Format(valueTypeNameFormatStr, originName));
             
             var table = new RawTable
             {
