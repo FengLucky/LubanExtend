@@ -1,18 +1,20 @@
 ﻿using System.Text;
 using Luban.Defs;
 using Luban.RawDefs;
+using Luban.Schema;
+using Luban.Schema.Builtin;
 using Luban.Utils;
-namespace Luban.Schema.Builtin;
+namespace Luban.Extend;
 
-[TableImporter("lf")]
-public class LFAutoTableImporter : ITableImporter
+[TableImporter("extend")]
+public class AutoTableImporter : ITableImporter
 {
     private static readonly NLog.Logger s_logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly Dictionary<string, (string name, string mode,string index, string tags)> _tableMetas = new();
+    private readonly Dictionary<string, (string name, string mode,string index, string tags,string groups)> _tableMetas = new();
     private readonly List<string> _validTableModes = ["map", "list", "one"];
     
-    public LFAutoTableImporter()
+    public AutoTableImporter()
     {
         if (EnvManager.Current.TryGetOption("tableImporter", "tableMeta", false, out var metaFilePath))
         {
@@ -29,7 +31,7 @@ public class LFAutoTableImporter : ITableImporter
                 {
                     continue;
                 }
-                (string name,string mode,string index,string tags) meta = ("","map", "","");
+                (string name,string mode,string index,string tags,string groups) meta = ("","map", "","","");
                 var lineConfigs = line.Split("@", 2);
                 if (lineConfigs.Length != 2 || string.IsNullOrWhiteSpace(lineConfigs[0]) || string.IsNullOrWhiteSpace(lineConfigs[1]))
                 {
@@ -69,6 +71,9 @@ public class LFAutoTableImporter : ITableImporter
                             break;
                         case "tags":
                             meta.tags = value;
+                            break;
+                        case "groups":
+                            meta.groups = value;
                             break;
                         default:
                             throw new Exception($"Table Meta: 第 {i+1} 行不能识别的配置项:{key}");
@@ -116,6 +121,7 @@ public class LFAutoTableImporter : ITableImporter
             var mode = TableMode.MAP;
             var tags = new Dictionary<string, string>();
             var index = "";
+            var groups = new List<string>();
             var originName = fileWithoutPrefixExt;
             var tableName = string.Format(tableNameFormatStr, originName);
             if (_tableMetas.TryGetValue(fileWithoutPrefixExt, out var meta))
@@ -125,6 +131,10 @@ public class LFAutoTableImporter : ITableImporter
                 index = meta.index;
                 mode = SchemaLoaderUtil.ConvertMode(file,tableName,meta.mode,meta.index);
                 tags = DefUtil.ParseAttrs(meta.tags);
+                if (!string.IsNullOrWhiteSpace(meta.groups))
+                {
+                    groups.AddRange(meta.groups.Split(','));
+                }
             }
             
             string tableNamespace = string.Format(tableNamespaceFormatStr, namespaceFromRelativePath,tableName);
@@ -139,7 +149,7 @@ public class LFAutoTableImporter : ITableImporter
                 ReadSchemaFromFile = true,
                 Mode = mode,
                 Comment = "",
-                Groups = new List<string> { },
+                Groups = groups,
                 InputFiles = new List<string> { relativePath },
                 OutputFile = "",
                 Tags = tags

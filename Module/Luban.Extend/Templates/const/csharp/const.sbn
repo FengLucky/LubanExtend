@@ -1,0 +1,13 @@
+﻿{{namespace_with_grace_begin __namespace}} 
+    public sealed class {{__name}}
+    {
+        {{~ for info in __infos ~}}
+{{~if info.comment != '' ~}}
+        /// <summary>
+        /// {{escape_comment info.comment}}
+        /// </summary>
+{{~end~}}
+        public const {{info.type}} {{format_field_name __code_style info.name}} = {{info.value}};
+        {{~end~}}
+    }
+{{namespace_with_grace_end __namespace}} 

@@ -70,13 +70,11 @@ if %errorlevel% neq 0 (
 )
 
 cd %build_dir%\luban\src
-dotnet sln add Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
-dotnet sln add Luban.Schema.LF/Luban.Schema.LF.csproj
+dotnet sln add Luban.Extend/Luban.Extend.csproj
 
 REM 添加 Luban 对扩展项目的引用
 cd Luban
-dotnet add reference ../Luban.DataTarget.Const/Luban.DataTarget.Const.csproj
-dotnet add reference ../Luban.Schema.LF/Luban.Schema.LF.csproj
+dotnet add reference ../Luban.Extend/Luban.Extend.csproj
 cd ../
 
 REM 返回初始目录
