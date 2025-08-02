@@ -62,7 +62,7 @@ public abstract class ConstTargetBase : IConstTarget
         }
 
         var infos = new List<ConstInfo>();
-        if (table.IsUnionIndex)
+        if (table.IsUnionIndex && table.IsListTable)
         {
             var types = new List<DefField>();
             foreach (var indexInfo in table.IndexList)
