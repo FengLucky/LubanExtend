@@ -14,7 +14,7 @@ using Scriban.Runtime;
 
 namespace Luban.Extend;
 
-public record class ConstInfo(string Type,string Name,string Value, string? Comment);
+public record class ConstInfo(string Type,string Name,string Value, string? Comment,bool IsUnionIndex);
 
 public abstract class ConstTargetBase : IConstTarget
 {
@@ -87,7 +87,7 @@ public abstract class ConstTargetBase : IConstTarget
                     var name = (record.Data.Fields[constIndex] as DString)?.Value ?? string.Empty;
                     var value = GetUnionIndexValue(indexValues);
                     var comment = GetComment(record, commentIndex);
-                    infos.Add(new ConstInfo(type,name,value,comment));
+                    infos.Add(new ConstInfo(type,name,value,comment,true));
                 }
             }
         }
@@ -112,7 +112,7 @@ public abstract class ConstTargetBase : IConstTarget
                     var name = (record.Data.Fields[constIndex] as DString)?.Value ?? string.Empty;
                     var value = record.Data.Fields[indexFieldIndex].Apply(ValueVisitor);
                     var comment = GetComment(record, commentIndex);
-                    infos.Add(new ConstInfo(type,name,value,comment));
+                    infos.Add(new ConstInfo(type,name,value,comment,false));
                 }
             }
         }

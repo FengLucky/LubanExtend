@@ -74,6 +74,9 @@ Build/publish 目录下会生成一份 `dll` 文件
 道具表@name = Item@mode=list@index=id@tags=index=multiple
 ```
 
+## godot-editor
+`godot` 编辑器代码目标，可以直接读取和保存 `json` 配置源文件
+
 ## 代码模板
 通过代码模板实现的扩展方法，仅支持 C#
 - 一个值索引多条配置：字段 `tags` 添加 `index=multiple`，仅在表的 `mode` 为 `list` 时生效。可给多个字段配置`tags`

@@ -7,7 +7,11 @@
         /// {{escape_comment info.comment}}
         /// </summary>
 {{~end~}}
+		{{~if info.is_union_index~}}
+		public static readonly {{info.type}} {{format_field_name __code_style info.name}} = {{info.value}};
+		{{~else~}}
         public const {{info.type}} {{format_field_name __code_style info.name}} = {{info.value}};
+        {{~end~}}
         {{~end~}}
     }
 {{namespace_with_grace_end __namespace}} 
