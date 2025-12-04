@@ -1,6 +1,43 @@
+{{
+	func gen_default_value
+		if $0.type_name == 'bean'
+			ret 'Schema.'+$0.def_bean.name+'.new_instance()'
+		else if $0.type_name == 'set' || $0.type_name == 'list' || $0.type_name == 'map' || $0.type_name == 'array'
+			ret '[]'
+		else if $0.type_name == 'enum'
+			ret $0.def_enum.name+'.'+$0.def_enum.items[0].name
+		else if $0.type_name == 'int' || $0.type_name == 'float' || $0.type_name == 'double' || $0.type_name == 'byte' || $0.type_name == 'datetime' || $0.type_name == 'short' || $0.type_name == 'long'
+			ret '0'
+		else if $0.type_name == 'bool'
+			ret 'false'
+		else if $0.type_name == 'string'
+			ret '""'
+		end
+	end	
+}}
+
 @tool
 class_name Schema
 extends RefCounted
+
+static func _array_to_json(array:Array):
+	var result := [];
+	for item in array:
+		if item is int or item is float or item is String or item is bool:
+			result.push_back(item);
+		else:
+			result.push_back(item.to_json());
+	return result;
+
+static func _dict_to_json(dict:Dictionary):
+	var result := [];
+	for k in dict:
+		var v = dict[k];
+		if v is int or v is float or v is String or v is bool:
+			result.push_back({k:v});
+		else:
+			result.push_back({k:v.to_json()});
+	return result;
 
 {{~for enum in __enums~}}
 {{~if enum.comment != '' ~}}
@@ -28,138 +65,239 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
     {{~if field.comment != '' ~}}
     ## {{field.comment | html.escape}}
     {{~end~}}
-    var {{format_field_name __code_style field.name}}: {{declaring_type_name field.ctype}}
+	var {{format_field_name __code_style field.name}}: {{declaring_type_name field.ctype}}
 {{~end~}}
+
+	static func new_instance() -> Schema.{{name}}:
+		{{~if bean.export_fields.empty?~}}
+		return Schema.{{name}}.new(null);
+		{{~else~}}
+		return Schema.{{name}}.new({
+		{{~ for field in bean.export_fields ~}}
+			"{{format_field_name __code_style field.name}}": {{gen_default_value field.ctype}},
+		{{~end~}}
+		})
+		{{~end~}}
 
 {{~if bean.is_abstract_type~}}
-    static func fromJson(_json_):
-        var type = _json_['$type']
-        match type:
+	static func fromJson(_json_):
+		var type = _json_['$type']
+		match type:
         {{~ for child in bean.hierarchy_not_abstract_children~}}
-            "{{impl_data_type child bean}}": return {{full_name child}}.new(_json_)
+			"{{impl_data_type child bean}}": return {{full_name child}}.new(_json_)
         {{~end~}}
-            _: assert(false)
+			_: assert(false)
 
 {{~end~}}
-    func _init(_json_) -> void:
+	func _init(_json_) -> void:
 {{~if bean.parent_def_type~}}
-        super(_json_)
+		super(_json_)
 {{~end~}}
         {{~ for field in bean.export_fields ~}}
-        {{deserialize_field ('self.' + (format_field_name __code_style field.name)) '_json_' field.name field.ctype}}
+		{{deserialize_field ('self.' + (format_field_name __code_style field.name)) '_json_' field.name field.ctype}}
         {{~end~}}
         {{~if bean.export_fields.empty?~}}
-        pass
+		pass
         {{~end~}}
-
-
+	
+	func to_json() -> Dictionary[String, Variant]:
+		{{~if bean.export_fields.empty?~}}
+		{{~if bean.parent_def_type~}}
+		return {"$type" : "{{name}}"}
+		{{~else~}}
+		return {}
+		{{~end~}}
+		{{~else~}}
+		return {
+		{{~if bean.parent_def_type~}}
+		"$type" : "{{name}}",
+		{{~end~}}
+		{{~ for field in bean.export_fields ~}}
+		{{~if field.ctype.type_name == 'set' || field.ctype.type_name == 'list'~}}
+		"{{field.name}}" : Schema._array_to_json(self.{{format_field_name __code_style field.name}}),
+		{{~else if field.ctype.type_name == 'map'~}}
+		"{{field.name}}" : Schema._dict_to_json(self.{{format_field_name __code_style field.name}}),
+		{{~else if field.ctype.is_bean~}}
+		"{{field.name}}" : self.{{format_field_name __code_style field.name}}.to_json(),
+		{{~else~}}
+		"{{field.name}}" : self.{{format_field_name __code_style field.name}},
+		{{~end~}}
+		{{~end~}}
+		}
+		{{~end~}}
+		
 {{~end~}}
+
 {{~for table in __tables
     value_type = table.value_ttype
     value_type_name = (declaring_type_name value_type)
 ~}}
+
+{{~if table.tags['editor'] != nil ~}}
 {{~if table.comment != '' ~}}
 ## {{table.comment | html.escape}}
 {{~end~}}
 class {{full_name table}}:
-    {{~if table.is_map_table ~}}
-    var _data_list: Array[{{value_type_name}}]
-    var _data_map: Dictionary
-    
-    func _init(_json_) -> void:
-        for _json2_ in _json_:
-            var _v: {{value_type_name}}
-            {{deserialize '_v' '_json2_' value_type}}
-            self._data_list.append(_v)
-            self._data_map[_v.{{format_field_name __code_style table.index_field.name}}] = _v
+	{{~ 
+		_params = ''
+		_condition = ''
+		_values = ''
+		_first = true
+		for INDEX in table.index_list
+			if !_first
+				_params += ', '
+				_values += ', '
+				_condition += ' and '
+			end
+			_first = false
+			_params += (format_field_name __code_style INDEX.index_field.name) + ' : ' + (declaring_type_name INDEX.index_field.ctype)
+			_condition += 'item.' + INDEX.index_field.name + ' == ' + (format_field_name __code_style INDEX.index_field.name)
+			_values += (format_field_name __code_style INDEX.index_field.name)
+		end
+	~}}
 
-    func get_data_list() -> Array[{{value_type_name}}]:
-        return self._data_list
+    {{~if table.is_map_table || table.is_list_table && table.index_list.size == 1~}}
+	var _data_list: Array[Schema.{{value_type_name}}]
+	var _data_map: Dictionary
+	
+	func _init(__path:String) -> void:
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			self._data_list.append(v)
+			self._data_map[v.{{format_field_name __code_style table.index_field.name}}] = v
+			
+	func new_config({{format_field_name __code_style table.index_field.name}} : {{declaring_type_name table.index_field.ctype}}) -> Schema.{{value_type_name}}:
+		assert(!self._data_map.has({{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}} " + str({{format_field_name __code_style table.index_field.name}}) + " already exists")
+		var config = Schema.{{value_type_name}}.new_instance()
+		config.{{format_field_name __code_style table.index_field.name}} = {{format_field_name __code_style table.index_field.name}}
+		self._data_map.set({{format_field_name __code_style table.index_field.name}}, config)
+		self._data_list.append(config)
+		return config
 
-    func get_data_map() -> Dictionary:
-        return self._data_map
+	func get_data_list() -> Array[Schema.{{value_type_name}}]:
+		return self._data_list
 
-    func get_item(key) -> {{value_type_name}}:
-        return self._data_map.get(key)
+	func get_data_map() -> Dictionary:
+		return self._data_map
+
+	func get_item(key : {{declaring_type_name table.index_field.ctype}}) -> Schema.{{value_type_name}}:
+		return self._data_map.get(key)
 
     {{~else if table.multi_key ~}}
-    var _data_list: Array[{{value_type_name}}]
+	var _data_list: Array[Schema.{{value_type_name}}]
     {{~ for INDEX in table.index_list ~}}
-    var _{{INDEX.index_field.name}}_data_map: Dictionary
+	var _{{INDEX.index_field.name}}_data_map: Dictionary
     {{~ end ~}} 
 
-    func _init(_json_) -> void:
+	func _init(__path:String) -> void:
         {{~ for INDEX in table.index_list ~}}
-        self._{{INDEX.index_field.name}}_data_map = {}
+		self._{{INDEX.index_field.name}}_data_map = {}
         {{~ end ~}}
-    
-        for _json2_ in _json_:
-            var _v: {{value_type_name}}
-            {{deserialize '_v' '_json2_' value_type}}
-            self._data_list.append(_v)
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			self._data_list.append(v)
         {{~ for INDEX in table.index_list ~}}
-            self._{{INDEX.index_field.name}}_data_map[_v.{{INDEX.index_field.name}}] = _v
+			self._{{INDEX.index_field.name}}_data_map[v.{{INDEX.index_field.name}}] = v
         {{~ end ~}}
+  
+	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
+		{{~ for INDEX in table.index_list ~}}
+		assert(!self._{{INDEX.index_field.name}}_data_map.has({{format_field_name __code_style INDEX.index_field.name}}),"{{format_field_name __code_style INDEX.index_field.name}} " + str({{format_field_name __code_style INDEX.index_field.name}}) + " already exists")
+		{{~ end ~}}
+		var config = Schema.{{value_type_name}}.new_instance()
+		{{~ for INDEX in table.index_list ~}}
+		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}}
+		{{~ end ~}}
+		{{~ for INDEX in table.index_list ~}}
+		self._{{INDEX.index_field.name}}_data_map.set({{format_field_name __code_style INDEX.index_field.name}}, config)
+		self._data_list.append(config)
+		{{~ end ~}}
+		return config
 
-    func get_data_list() -> Array[{{value_type_name}}]:
-        return self._data_list
+	func get_data_list() -> Array[Schema.{{value_type_name}}]:
+		return self._data_list
 
     {{~ for INDEX in table.index_list ~}}
-    func get_{{INDEX.index_field.name}}_data_map() -> Dictionary:
-        return self._{{INDEX.index_field.name}}_data_map
+	func get_{{INDEX.index_field.name}}_data_map() -> Dictionary:
+		return self._{{INDEX.index_field.name}}_data_map
     {{~ end ~}}
 
 {{~ for INDEX in table.index_list ~}}
-    func get_item_by_{{INDEX.index_field.name}}({{INDEX.index_field.name}}) -> {{value_type_name}}:
-        return self._{{INDEX.index_field.name}}_data_map.get({{INDEX.index_field.name}})
+	func get_item_by_{{INDEX.index_field.name}}({{INDEX.index_field.name}}) -> Schema.{{value_type_name}}:
+		return self._{{INDEX.index_field.name}}_data_map.get({{INDEX.index_field.name}})
 
 {{~ end ~}}
     {{~else if table.is_list_table ~}}
-    var _data_list: Array[{{value_type_name}}]
-    
-    func _init(_json_) -> void:
-        for _json2_ in _json_:
-            var _v: {{value_type_name}}
-            {{deserialize '_v' '_json2_' value_type}}
-            self._data_list.append(_v)
+	var _data_list: Array[Schema.{{value_type_name}}]
 
-    func get_data_list() -> Array[{{value_type_name}}]:
-        return self._data_list
+	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
+		{{~if table.index_list.size > 1~}}
+		assert(self.get_item_by_union({{~_values~}}) == null,"union index allready exists")
+		{{~end~}}
+		var config = Schema.{{value_type_name}}.new_instance()
+		{{~ for INDEX in table.index_list ~}}
+		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}}
+		{{~ end ~}}
+		{{~ for INDEX in table.index_list ~}}
+		self._data_list.append(config)
+		{{~ end ~}}
+		return config
     
-    func get_item(index) -> {{value_type_name}}:
-        return self._data_list[index]
+	func _init(__path:String) -> void:
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			self._data_list.append(v)
+
+	func get_data_list() -> Array[Schema.{{value_type_name}}]:
+		return self._data_list
+    
+	func get_item(index : int) -> Schema.{{value_type_name}}:
+		return self._data_list[index]
+		
+	{{~if table.index_list.size > 1~}}
+	func get_item_by_union({{_params}}) -> Schema.{{value_type_name}}:
+		for item in self._data_list:
+			if {{_condition}}:
+				return item
+		return null;
+		
+	{{~end~}}	
     {{~else~}}
-    var _data:{{value_type_name}}
+	var _data:Schema.{{value_type_name}}
     
-    func _init(_json_) -> void:
-        assert(len(_json_) == 1, "table mode = one, but size != 1")
-        {{deserialize 'self._data' '_json_[0]' value_type}}
-
-    func get_data() -> {{value_type_name}}:
-        return self._data
+	func _init(__path:String) -> void:
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		if len(json) == 0:
+			self._data = Schema.{{value_type_name}}.new_instance()
+		else:
+			self._data = Schema.{{value_type_name}}.new(json[0])
+		
+	func get_data() -> Schema.{{value_type_name}}:
+		return self._data
 
     {{~ for field in value_type.def_bean.hierarchy_export_fields
      name = format_field_name __code_style field.name
      ~}}
 {{~if field.comment != '' ~}}
-    ## {{escape_comment field.comment}}
+	## {{escape_comment field.comment}}
 {{~end~}}
-    var {{name}}: {{declaring_type_name field.ctype}}:
-        get: return self._data.{{name}}
+	var {{name}}: {{declaring_type_name field.ctype}}:
+		get: return self._data.{{name}}
 
     {{~end~}}
     {{~end~}}
-
+	func save_to_json(__path:String) -> void:
+		{{~if table.is_singleton_table ~}}
+		var array = Schema._array_to_json([self._data])
+		{{~else~}}
+		var array = Schema._array_to_json(self._data_list)
+		{{~end~}}
+		var json = JSON.stringify(array,"\t")
+		var access = FileAccess.open(__path,FileAccess.WRITE)
+		assert(access != null,"file open fail!")
+		assert(access.store_string(json),"file write fail!")
 {{~end~}}
-class {{str_full_name __full_name}}:
-    {{~for table in __tables ~}}
-    {{~if table.comment != ''~}}
-    ## {{table.comment | html.escape}}
-    {{~end~}}
-    var {{format_method_name __code_style table.name}}: {{full_name table}}
-    {{~end~}}
-    
-    func _init(loader: Callable) -> void:
-        {{~for table in __tables ~}}
-        self.{{format_method_name __code_style table.name}} = {{full_name table}}.new(loader.call('{{table.output_data_file}}'))
-        {{~end~}}
+{{~end~}}

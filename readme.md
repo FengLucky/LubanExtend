@@ -76,6 +76,7 @@ Build/publish 目录下会生成一份 `dll` 文件
 
 ## godot-editor
 `godot` 编辑器代码目标，可以直接读取和保存 `json` 配置源文件
+需要配置 `table`属性`tags=editor`
 
 ## 代码模板
 通过代码模板实现的扩展方法，仅支持 C#
