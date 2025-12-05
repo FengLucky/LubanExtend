@@ -161,7 +161,7 @@ using System.Collections.Generic;
         {{~end~}}
         {{~end~}}   
         {{~if __table.is_union_index~}}
-        public {{declaring_type_name value_type}} Get({{table_param_def_list}}) => _dataMapUnion.GetValueOrDefault(({{table_param_name_list}}));
+        public {{declaring_type_name value_type}} GetOrDefault({{table_param_def_list}}) => _dataMapUnion.GetValueOrDefault(({{table_param_name_list}}));
         {{~else if !__table.index_list.empty? ~}}
             {{~for idx in __table.index_list~}}
         public {{declaring_type_name value_type}} GetBy{{format_property_name __code_style idx.index_field.name}}({{declaring_type_name idx.type}} key) => _dataMap_{{idx.index_field.name}}.GetValueOrDefault(key);

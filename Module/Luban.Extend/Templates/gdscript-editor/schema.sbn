@@ -20,7 +20,7 @@
 class_name Schema
 extends RefCounted
 
-static func _array_to_json(array:Array):
+static func _array_to_json(array:Array) -> Array[Variant]:
 	var result := [];
 	for item in array:
 		if item is int or item is float or item is String or item is bool:
@@ -29,7 +29,7 @@ static func _array_to_json(array:Array):
 			result.push_back(item.to_json());
 	return result;
 
-static func _dict_to_json(dict:Dictionary):
+static func _dict_to_json(dict:Dictionary) -> Array[Variant]:
 	var result := [];
 	for k in dict:
 		var v = dict[k];
@@ -137,22 +137,28 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
 {{~if table.comment != '' ~}}
 ## {{table.comment | html.escape}}
 {{~end~}}
-class {{full_name table}}:
+class {{full_name table}} extends RefCounted:
 	{{~ 
 		_params = ''
 		_condition = ''
+		_condition_with_item = ''
 		_values = ''
+		_values_with_item = ''
 		_first = true
 		for INDEX in table.index_list
 			if !_first
 				_params += ', '
 				_values += ', '
+				_values_with_item += ', '
 				_condition += ' and '
+				_condition_with_item += ' and '
 			end
 			_first = false
-			_params += (format_field_name __code_style INDEX.index_field.name) + ' : ' + (declaring_type_name INDEX.index_field.ctype)
+			_params += (format_field_name __code_style INDEX.index_field.name) + ':' + (declaring_type_name INDEX.index_field.ctype)
 			_condition += 'item.' + INDEX.index_field.name + ' == ' + (format_field_name __code_style INDEX.index_field.name)
+			_condition_with_item += 'bean.' + INDEX.index_field.name + ' == item.' + (format_field_name __code_style INDEX.index_field.name)
 			_values += (format_field_name __code_style INDEX.index_field.name)
+			_values_with_item += 'item.' + INDEX.index_field.name
 		end
 	~}}
 
@@ -168,12 +174,23 @@ class {{full_name table}}:
 			self._data_map[v.{{format_field_name __code_style table.index_field.name}}] = v
 			
 	func new_config({{format_field_name __code_style table.index_field.name}} : {{declaring_type_name table.index_field.ctype}}) -> Schema.{{value_type_name}}:
-		assert(!self._data_map.has({{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}} " + str({{format_field_name __code_style table.index_field.name}}) + " already exists")
+		assert(!self._data_map.has({{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}}=" + str({{format_field_name __code_style table.index_field.name}}) + " already exists")
 		var config = Schema.{{value_type_name}}.new_instance()
 		config.{{format_field_name __code_style table.index_field.name}} = {{format_field_name __code_style table.index_field.name}}
-		self._data_map.set({{format_field_name __code_style table.index_field.name}}, config)
-		self._data_list.append(config)
 		return config
+	
+	func add_item(item:Schema.{{value_type_name}}):
+		assert(!self._data_map.has(item.{{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}}=" + str(item.{{format_field_name __code_style table.index_field.name}}) + " already exists")	
+		self._data_map.set(item.{{format_field_name __code_style table.index_field.name}}, item)
+		self._data_list.append(item)
+	
+	func remove_item(item:Schema.{{value_type_name}}):
+		self._data_map.erase(item.{{format_field_name __code_style table.index_field.name}})
+		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+			return bean.{{format_field_name __code_style table.index_field.name}} == item.{{format_field_name __code_style table.index_field.name}}
+		)
+		if index >= 0:
+			self._data_list.remove_at(index)
 
 	func get_data_list() -> Array[Schema.{{value_type_name}}]:
 		return self._data_list
@@ -204,17 +221,32 @@ class {{full_name table}}:
   
 	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
 		{{~ for INDEX in table.index_list ~}}
-		assert(!self._{{INDEX.index_field.name}}_data_map.has({{format_field_name __code_style INDEX.index_field.name}}),"{{format_field_name __code_style INDEX.index_field.name}} " + str({{format_field_name __code_style INDEX.index_field.name}}) + " already exists")
+		assert(!self._{{INDEX.index_field.name}}_data_map.has({{format_field_name __code_style INDEX.index_field.name}}),"{{format_field_name __code_style INDEX.index_field.name}}=" + str({{format_field_name __code_style INDEX.index_field.name}}) + " already exists")
 		{{~ end ~}}
 		var config = Schema.{{value_type_name}}.new_instance()
 		{{~ for INDEX in table.index_list ~}}
 		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}}
 		{{~ end ~}}
-		{{~ for INDEX in table.index_list ~}}
-		self._{{INDEX.index_field.name}}_data_map.set({{format_field_name __code_style INDEX.index_field.name}}, config)
-		self._data_list.append(config)
-		{{~ end ~}}
 		return config
+		
+	func add_item(item:Schema.{{value_type_name}}):
+		{{~ for INDEX in table.index_list ~}}
+		assert(!self._{{INDEX.index_field.name}}_data_map.has(item.{{INDEX.index_field.name}}),"{{format_field_name __code_style INDEX.index_field.name}}=" + str(item.{{INDEX.index_field.name}}) + " already exists")
+		{{~ end ~}}
+		{{~ for INDEX in table.index_list ~}}
+		self._{{INDEX.index_field.name}}_data_map.set(item.{{format_field_name __code_style INDEX.index_field.name}}, item)
+		{{~ end ~}}
+		self._data_list.append(item)
+	
+	func remove_item(item:Schema.{{value_type_name}}):
+		{{~ for INDEX in table.index_list ~}}
+		self._{{INDEX.index_field.name}}_data_map.erase(item.{{INDEX.index_field.name}})
+		{{~ end ~}}
+		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+			return {{_condition_with_item}}
+		)
+		if index >= 0:
+			self._data_list.remove_at(index)
 
 	func get_data_list() -> Array[Schema.{{value_type_name}}]:
 		return self._data_list
@@ -222,8 +254,8 @@ class {{full_name table}}:
     {{~ for INDEX in table.index_list ~}}
 	func get_{{INDEX.index_field.name}}_data_map() -> Dictionary:
 		return self._{{INDEX.index_field.name}}_data_map
+		
     {{~ end ~}}
-
 {{~ for INDEX in table.index_list ~}}
 	func get_item_by_{{INDEX.index_field.name}}({{INDEX.index_field.name}}) -> Schema.{{value_type_name}}:
 		return self._{{INDEX.index_field.name}}_data_map.get({{INDEX.index_field.name}})
@@ -232,6 +264,12 @@ class {{full_name table}}:
     {{~else if table.is_list_table ~}}
 	var _data_list: Array[Schema.{{value_type_name}}]
 
+	func _init(__path:String) -> void:
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			self._data_list.append(v)
+			
 	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
 		{{~if table.index_list.size > 1~}}
 		assert(self.get_item_by_union({{~_values~}}) == null,"union index allready exists")
@@ -240,16 +278,26 @@ class {{full_name table}}:
 		{{~ for INDEX in table.index_list ~}}
 		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}}
 		{{~ end ~}}
-		{{~ for INDEX in table.index_list ~}}
-		self._data_list.append(config)
-		{{~ end ~}}
 		return config
-    
-	func _init(__path:String) -> void:
-		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
-		for item in json:
-			var v := Schema.{{value_type_name}}.new(item)
-			self._data_list.append(v)
+		
+	func add_item(item:Schema.{{value_type_name}}):
+		{{~if table.index_list.size > 1~}}
+		assert(self.get_item_by_union({{~_values_with_item~}}) == null,"union index allready exists")
+		{{~end~}}
+		self._data_list.append(item)
+		
+	{{~if table.index_list.size > 1~}}
+	func remove_item(item:Schema.{{value_type_name}}):
+		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+			return {{_condition_with_item}}
+		)
+		if index >= 0:
+			self._data_list.remove_at(index)
+	{{~else~}}
+	func remove_item(index:int):
+		if index >= 0:
+			self._data_list.remove_at(index)
+	{{~end~}}
 
 	func get_data_list() -> Array[Schema.{{value_type_name}}]:
 		return self._data_list
@@ -286,17 +334,18 @@ class {{full_name table}}:
 {{~end~}}
 	var {{name}}: {{declaring_type_name field.ctype}}:
 		get: return self._data.{{name}}
+		set(value): self._data.{{name}} = value
 
     {{~end~}}
     {{~end~}}
 	func save_to_json(__path:String) -> void:
 		{{~if table.is_singleton_table ~}}
-		var array = Schema._array_to_json([self._data])
+		var array := Schema._array_to_json([self._data])
 		{{~else~}}
-		var array = Schema._array_to_json(self._data_list)
+		var array := Schema._array_to_json(self._data_list)
 		{{~end~}}
-		var json = JSON.stringify(array,"\t")
-		var access = FileAccess.open(__path,FileAccess.WRITE)
+		var json := JSON.stringify(array,"\t")
+		var access := FileAccess.open(__path,FileAccess.WRITE)
 		assert(access != null,"file open fail!")
 		assert(access.store_string(json),"file write fail!")
 {{~end~}}
