@@ -186,7 +186,7 @@ class {{full_name table}} extends RefCounted:
 	
 	func remove_item(item:Schema.{{value_type_name}}):
 		self._data_map.erase(item.{{format_field_name __code_style table.index_field.name}})
-		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+		var index := self._data_list.find_custom(func (bean:Schema.{{value_type_name}}) -> bool:
 			return bean.{{format_field_name __code_style table.index_field.name}} == item.{{format_field_name __code_style table.index_field.name}}
 		)
 		if index >= 0:
@@ -242,7 +242,7 @@ class {{full_name table}} extends RefCounted:
 		{{~ for INDEX in table.index_list ~}}
 		self._{{INDEX.index_field.name}}_data_map.erase(item.{{INDEX.index_field.name}})
 		{{~ end ~}}
-		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+		var index := self._data_list.find_custom(func (bean:Schema.{{value_type_name}}) -> bool:
 			return {{_condition_with_item}}
 		)
 		if index >= 0:
@@ -288,7 +288,7 @@ class {{full_name table}} extends RefCounted:
 		
 	{{~if table.index_list.size > 1~}}
 	func remove_item(item:Schema.{{value_type_name}}):
-		var index := self._data_list.find_custom(func (bean:Schema.TestBean) -> bool:
+		var index := self._data_list.find_custom(func (bean:Schema.{{value_type_name}}) -> bool:
 			return {{_condition_with_item}}
 		)
 		if index >= 0:
