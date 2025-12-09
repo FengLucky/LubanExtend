@@ -53,6 +53,19 @@ enum {{full_name enum}}
     {{~end~}}
 }
 
+static func get_{{full_name enum}}_alias(value:{{full_name enum}}) -> String:
+	match value:
+	{{~ for item in enum.items ~}}
+		{{item.value}}:
+			{{~if item.alias != ''~}}
+			return "{{item.alias | html.escape}}"
+			{{~else~}}
+			return "{{item.name}}"
+			{{~end~}}
+	{{~end~}}
+		_:
+			return "Unknown"
+
 {{~end~}}
 {{~for bean in __beans
     name = (full_name bean)
