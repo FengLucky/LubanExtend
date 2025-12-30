@@ -38,6 +38,13 @@ static func _dict_to_json(dict:Dictionary) -> Array[Variant]:
 		else:
 			result.push_back({k:v.to_json()});
 	return result;
+	
+static func save_one_file(bean:Variant,path:String) -> void:
+	var array := Schema._array_to_json([bean])
+	var json := JSON.stringify(array,"\t")
+	var access := FileAccess.open(path,FileAccess.WRITE)
+	assert(access != null,"file open fail:"+path)
+	assert(access.store_string(json),"file write fail:"+path)
 
 {{~for enum in __enums~}}
 {{~if enum.comment != '' ~}}
@@ -176,22 +183,28 @@ class {{full_name table}} extends RefCounted:
 	~}}
 
     {{~if table.is_map_table || table.is_list_table && table.index_list.size == 1~}}
-	var _data_list: Array[Schema.{{value_type_name}}]
-	var _data_map: Dictionary
+	var _data_list: Array[Schema.{{value_type_name}}] = [];
+	var _data_map: Dictionary[{{declaring_type_name table.index_field.ctype}},Schema.{{value_type_name}}] = {};
+	
+	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
+		var files := DirAccess.get_files_at(__dir);
+		var table = Schema.{{full_name table}}.new("");
+		for file in files:
+			table._load_one_file(file);
+		return table;
 	
 	func _init(__path:String) -> void:
-		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
-		for item in json:
-			var v := Schema.{{value_type_name}}.new(item)
-			self._data_list.append(v)
-			self._data_map[v.{{format_field_name __code_style table.index_field.name}}] = v
+		_load_one_file(__path);
+		
+	func reload_file(__path:String) -> void:
+		_load_one_file(__path,true);
 			
 	func new_config({{format_field_name __code_style table.index_field.name}} : {{declaring_type_name table.index_field.ctype}}) -> Schema.{{value_type_name}}:
 		assert(!self._data_map.has({{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}}=" + str({{format_field_name __code_style table.index_field.name}}) + " already exists")
 		var config = Schema.{{value_type_name}}.new_instance()
 		config.{{format_field_name __code_style table.index_field.name}} = {{format_field_name __code_style table.index_field.name}}
 		return config
-	
+
 	func add_item(item:Schema.{{value_type_name}}):
 		assert(!self._data_map.has(item.{{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}}=" + str(item.{{format_field_name __code_style table.index_field.name}}) + " already exists")	
 		self._data_map.set(item.{{format_field_name __code_style table.index_field.name}}, item)
@@ -213,24 +226,38 @@ class {{full_name table}} extends RefCounted:
 
 	func get_item(key : {{declaring_type_name table.index_field.ctype}}) -> Schema.{{value_type_name}}:
 		return self._data_map.get(key)
-
-    {{~else if table.multi_key ~}}
-	var _data_list: Array[Schema.{{value_type_name}}]
-    {{~ for INDEX in table.index_list ~}}
-	var _{{INDEX.index_field.name}}_data_map: Dictionary
-    {{~ end ~}} 
-
-	func _init(__path:String) -> void:
-        {{~ for INDEX in table.index_list ~}}
-		self._{{INDEX.index_field.name}}_data_map = {}
-        {{~ end ~}}
+		
+	func _load_one_file(__path:String,replace:bool = false) -> void:
+		if __path.is_empty():
+			return
+		assert(FileAccess.file_exists(__path),"file does not exist:"+__path);
 		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
 		for item in json:
 			var v := Schema.{{value_type_name}}.new(item)
+			if replace:
+				remove_item(v);
 			self._data_list.append(v)
-        {{~ for INDEX in table.index_list ~}}
-			self._{{INDEX.index_field.name}}_data_map[v.{{INDEX.index_field.name}}] = v
-        {{~ end ~}}
+			self._data_map[v.{{format_field_name __code_style table.index_field.name}}] = v
+
+    {{~else if table.multi_key ~}}
+	var _data_list: Array[Schema.{{value_type_name}}] = [];
+    {{~ for INDEX in table.index_list ~}}
+	var _{{INDEX.index_field.name}}_data_map: Dictionary[{{INDEX.index_field.ctype}},Schema.{{value_type_name}}] = {};
+    {{~ end ~}} 
+    
+	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
+		var table = Schema.{{full_name table}}.new("");
+		for file in files:
+			table._load_one_file(file);
+		return table;
+	
+	func _init(__path:String) -> void:
+		if __path.is_empty():
+			return
+		_load_one_file(__path);
+		
+	func reload_file(__path:String) -> void:
+		_load_one_file(__path,true);
   
 	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
 		{{~ for INDEX in table.index_list ~}}
@@ -268,20 +295,46 @@ class {{full_name table}} extends RefCounted:
 	func get_{{INDEX.index_field.name}}_data_map() -> Dictionary:
 		return self._{{INDEX.index_field.name}}_data_map
 		
+	func _load_one_file(__path:String,replace:bool = false) -> void:
+		if __path.is_empty():
+			return
+		assert(FileAccess.file_exists(__path),"file does not exist:"+__path);
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			if replace:
+				remove_item(v);
+			self._data_list.append(v)
+        {{~ for INDEX in table.index_list ~}}
+			self._{{INDEX.index_field.name}}_data_map[v.{{INDEX.index_field.name}}] = v
+        {{~ end ~}}
+		
     {{~ end ~}}
 {{~ for INDEX in table.index_list ~}}
-	func get_item_by_{{INDEX.index_field.name}}({{INDEX.index_field.name}}) -> Schema.{{value_type_name}}:
+	func get_item_by_{{INDEX.index_field.name}}({{INDEX.index_field.name}}:{{INDEX.index_field.ctype}}) -> Schema.{{value_type_name}}:
 		return self._{{INDEX.index_field.name}}_data_map.get({{INDEX.index_field.name}})
 
 {{~ end ~}}
     {{~else if table.is_list_table ~}}
 	var _data_list: Array[Schema.{{value_type_name}}]
-
+	
+	{{~if table.index_list.size > 1~}}
+	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
+		var table = Schema.{{full_name table}}.new("");
+		for file in files:
+			table._load_one_file(file);
+		return table;
+	{{~end~}}
+	
 	func _init(__path:String) -> void:
-		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
-		for item in json:
-			var v := Schema.{{value_type_name}}.new(item)
-			self._data_list.append(v)
+		if __path.is_empty():
+			return
+		_load_one_file(__path);
+		
+	{{~if table.index_list.size > 1~}}
+	func reload_file(__path:String) -> void:
+		_load_one_file(__path,true);
+	{{~end~}}
 			
 	func new_config({{~_params~}}) -> Schema.{{value_type_name}}:
 		{{~if table.index_list.size > 1~}}
@@ -326,6 +379,20 @@ class {{full_name table}} extends RefCounted:
 		return null;
 		
 	{{~end~}}	
+	
+	func _load_one_file(__path:String,replace:bool = false) -> void:
+		if __path.is_empty():
+			return
+		assert(FileAccess.file_exists(__path),"file does not exist:"+__path);
+		var json = JSON.parse_string(FileAccess.get_file_as_string(__path))
+		for item in json:
+			var v := Schema.{{value_type_name}}.new(item)
+			{{~if table.index_list.size > 1~}}
+			if replace:
+				remove_item(v);
+			{{~end~}}
+			self._data_list.append(v)
+	
     {{~else~}}
 	var _data:Schema.{{value_type_name}}
     
@@ -359,7 +426,7 @@ class {{full_name table}} extends RefCounted:
 		{{~end~}}
 		var json := JSON.stringify(array,"\t")
 		var access := FileAccess.open(__path,FileAccess.WRITE)
-		assert(access != null,"file open fail!")
-		assert(access.store_string(json),"file write fail!")
+		assert(access != null,"file open fail:"+__path)
+		assert(access.store_string(json),"file write fail:"+__path)
 {{~end~}}
 {{~end~}}
