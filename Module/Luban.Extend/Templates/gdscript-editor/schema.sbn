@@ -190,7 +190,7 @@ class {{full_name table}} extends RefCounted:
 		var files := DirAccess.get_files_at(__dir);
 		var table = Schema.{{full_name table}}.new("");
 		for file in files:
-			table._load_one_file(file);
+			table._load_one_file(__dir + file);
 		return table;
 	
 	func _init(__path:String) -> void:
@@ -248,7 +248,7 @@ class {{full_name table}} extends RefCounted:
 	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
 		var table = Schema.{{full_name table}}.new("");
 		for file in files:
-			table._load_one_file(file);
+			table._load_one_file(__dir + file);
 		return table;
 	
 	func _init(__path:String) -> void:
@@ -322,7 +322,7 @@ class {{full_name table}} extends RefCounted:
 	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
 		var table = Schema.{{full_name table}}.new("");
 		for file in files:
-			table._load_one_file(file);
+			table._load_one_file(__dir + file);
 		return table;
 	{{~end~}}
 	
