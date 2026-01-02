@@ -223,7 +223,6 @@ class {{full_name table}} extends RefCounted:
 		assert(!self._data_map.has({{format_field_name __code_style table.index_field.name}}),"{{format_field_name __code_style table.index_field.name}}=" + str({{format_field_name __code_style table.index_field.name}}) + " already exists");
 		var config := item.duplicate();
 		config.{{format_field_name __code_style table.index_field.name}} = {{format_field_name __code_style table.index_field.name}};
-		add_item(config);
 		return config;
 
 	func add_item(item:Schema.{{value_type_name}}):
@@ -298,7 +297,6 @@ class {{full_name table}} extends RefCounted:
 		{{~ for INDEX in table.index_list ~}}
 		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}};
 		{{~ end ~}}
-		add_item(config);
 		return config;
 		
 	func add_item(item:Schema.{{value_type_name}}):
@@ -382,7 +380,6 @@ class {{full_name table}} extends RefCounted:
 		{{~ for INDEX in table.index_list ~}}
 		config.{{format_field_name __code_style INDEX.index_field.name}} = {{format_field_name __code_style INDEX.index_field.name}};
 		{{~ end ~}}
-		add_item(config);
 		return config;
 		
 	func add_item(item:Schema.{{value_type_name}}):
