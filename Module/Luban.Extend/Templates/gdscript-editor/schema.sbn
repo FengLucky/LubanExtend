@@ -122,8 +122,7 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
         
 	func duplicate() -> Schema.{{name}}:
 		var dict := to_json();
-		var json := JSON.stringify(dict);
-		return Schema.{{name}}.new(json);
+		return Schema.{{name}}.new(dict);
 	
 	func to_json() -> Dictionary[String, Variant]:
 		{{~if bean.export_fields.empty?~}}
