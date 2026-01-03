@@ -81,11 +81,17 @@ static func get_{{full_name enum}}_alias(value:{{full_name enum}}) -> String:
 ## {{bean.comment | html.escape}}
 {{~end~}}
 class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_type}}{{end}}:
+
+	const __alias :String = "{{~if bean.alias != ''~}}{{bean.alias | html.escape}}{{~else~}}{{name}}{{~end~}}";
+{{~ for field in bean.export_fields ~}}
+	const __alias_{{format_field_name __code_style field.name}}: String = "{{~if field.alias != ''~}}{{field.alias | html.escape}}{{~else~}}{{format_field_name __code_style field.name}}{{~end~}}";
+{{~end~}}
+	
 {{~ for field in bean.export_fields ~}}
     {{~if field.comment != '' ~}}
     ## {{field.comment | html.escape}}
     {{~end~}}
-	var {{format_field_name __code_style field.name}}: {{declaring_type_name field.ctype}}
+	var {{format_field_name __code_style field.name}}: {{declaring_type_name field.ctype}};
 {{~end~}}
 
 	static func new_instance() -> Schema.{{name}}:
