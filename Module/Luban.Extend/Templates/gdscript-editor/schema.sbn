@@ -1,4 +1,4 @@
-{{
+{{~
 	func gen_default_value
 		if $0.type_name == 'bean'
 			ret 'Schema.'+$0.def_bean.name+'.new_instance()'
@@ -14,8 +14,7 @@
 			ret '""'
 		end
 	end	
-}}
-
+~}}
 @tool
 class_name Schema
 extends RefCounted
@@ -54,9 +53,9 @@ enum {{full_name enum}}
 {
     {{~ for item in enum.items ~}}
     {{~if item.comment_or_alias != '' ~}}
-    ## {{item.comment_or_alias | html.escape}}
+	## {{item.comment_or_alias | html.escape}}
     {{~end~}}
-    {{item.name}} = {{item.value}},
+	{{item.name}} = {{item.value}},
     {{~end~}}
 }
 
@@ -89,7 +88,7 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
 	
 {{~ for field in bean.export_fields ~}}
     {{~if field.comment != '' ~}}
-    ## {{field.comment | html.escape}}
+	## {{field.comment | html.escape}}
     {{~end~}}
 	var {{format_field_name __code_style field.name}}: {{declaring_type_name field.ctype}};
 {{~end~}}
@@ -125,7 +124,7 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
         {{~if bean.export_fields.empty?~}}
 		pass
         {{~end~}}
-        
+
 	func duplicate() -> Schema.{{name}}:
 		var dict := to_json();
 		return Schema.{{name}}.new(dict);
@@ -157,12 +156,10 @@ class {{name}}{{if bean.parent_def_type}} extends {{full_name bean.parent_def_ty
 		{{~end~}}
 		
 {{~end~}}
-
 {{~for table in __tables
     value_type = table.value_ttype
     value_type_name = (declaring_type_name value_type)
 ~}}
-
 {{~if table.tags['editor'] != nil ~}}
 {{~if table.comment != '' ~}}
 ## {{table.comment | html.escape}}
@@ -198,7 +195,7 @@ class {{full_name table}} extends RefCounted:
 	
 	static func load_from_dir(__dir:String) -> Schema.{{full_name table}}:
 		var files := DirAccess.get_files_at(__dir);
-		var table = Schema.{{full_name table}}.new("");
+		var table := Schema.{{full_name table}}.new("");
 		for file in files:
 			table._load_one_file(__dir + file);
 		return table;
@@ -450,10 +447,10 @@ class {{full_name table}} extends RefCounted:
     {{~end~}}
     {{~end~}}
 	func duplicate() -> Schema.{{full_name table}}:
-		var table = Schema.{{full_name table}}.new("");
+		var table := Schema.{{full_name table}}.new("");
 		table._parse_from_json(to_json());
 		return table;
-    
+
 	func save_to_json(__path:String) -> void:
 		var access := FileAccess.open(__path,FileAccess.WRITE)
 		assert(access != null,"file open fail:"+__path)
