@@ -89,6 +89,8 @@ using System.Collections.Generic;
                 v.ResolveRef();
             }
             {{~end~}}
+
+            Cache();
         }
         
         public override void PreExport()
@@ -235,6 +237,8 @@ using System.Collections.Generic;
                 v.ResolveRef();
             }
             {{~end~}}
+
+            Cache();
         }
         {{~else~}}
     
@@ -280,7 +284,11 @@ using System.Collections.Generic;
             {{~if !__value_type.def_bean.is_value_type~}}
             _data.ResolveRef();
             {{~end~}}
+
+            Cache();
         }
         {{~end~}}
+
+        partial void Cache();
     }
 {{namespace_with_grace_end __namespace_with_top_module}}

@@ -44,7 +44,7 @@ using System.Collections.Generic;
     {{~end~}}
     public partial class {{__name}} : TableBase
     {
-        {{~if __table.is_map_table ~}}
+		{{~if __table.is_map_table ~}}
         private readonly Dictionary<{{declaring_type_name key_type}}, {{declaring_type_name value_type}}> _dataMap;
         private readonly List<{{declaring_type_name value_type}}> _dataList;
         
@@ -81,6 +81,8 @@ using System.Collections.Generic;
                 v.ResolveRef();
             }
             {{~end~}}
+
+            Cache();
         }
         
         public override void PreExport()
@@ -96,7 +98,7 @@ using System.Collections.Generic;
             configs.AddRange(DataList.OfType<object>());
             return configs;
         }    
-            {{~else if __table.is_list_table ~}}
+		{{~else if __table.is_list_table ~}}
         private readonly List<{{declaring_type_name value_type}}> _dataList;
         {{~ for field in __value_type.def_bean.hierarchy_export_fields ~}}
         {{~if field.tags['index'] == 'multiple'~}}     
@@ -176,6 +178,8 @@ using System.Collections.Generic;
                 v.ResolveRef();
             }
             {{~end~}}
+
+            Cache();
         }
         {{~else~}}
     
@@ -209,5 +213,7 @@ using System.Collections.Generic;
             {{~end~}}
         }
         {{~end~}}
+
+        partial void Cache();
     }
 {{namespace_with_grace_end __namespace_with_top_module}}
