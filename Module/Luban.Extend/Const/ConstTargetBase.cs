@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Luban.CodeFormat;
 using Luban.CodeFormat.CodeStyles;
 using Luban.CodeTarget;
@@ -14,7 +14,7 @@ using Scriban.Runtime;
 
 namespace Luban.Extend;
 
-public record class ConstInfo(string Type,string Name,string Value, string? Comment,bool IsUnionIndex);
+public record class ConstInfo(string Type,string Name,string Value, string Comment,bool IsUnionIndex);
 
 public abstract class ConstTargetBase : IConstTarget
 {
@@ -141,14 +141,14 @@ public abstract class ConstTargetBase : IConstTarget
         return table.ValueTType.DefBean.Fields.FindIndex(field => field.CurrentVariantNameWithFieldNameOrOrigin == name);
     }
 
-    private string? GetComment(Record record, int index)
+    private string GetComment(Record record, int index)
     {
         if (index > -1)
         {
-            return (record.Data.Fields[index] as DString)?.Value;
+            return (record.Data.Fields[index] as DString)?.Value ?? string.Empty;
         }
 
-        return null;
+        return string.Empty;
     }
 
     protected virtual void Render(string className,List<ConstInfo> infos,CodeWriter writer)
